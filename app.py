@@ -293,6 +293,61 @@ HTML = """
 def home():
     return render_template_string(HTML)
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        name = request.form["name"]
+        skill = request.form["skill"]
+        phone = request.form["phone"]
+        location = request.form["location"]
+        experience = request.form["experience"]
+        description = request.form["description"]
 
+        conn = sqlite3.connect("workers.db")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS workers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                skill TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                location TEXT NOT NULL,
+                experience TEXT,
+                description TEXT
+            )
+        """)
+
+        cursor.execute("""
+            INSERT INTO workers
+            (name, skill, phone, location, experience, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (name, skill, phone, location, experience, description))
+
+        conn.commit()
+        conn.close()
+
+        return "Worker registered successfully!"
+
+    return """
+    <h1>Register as a Worker</h1>
+
+    <form method="POST">
+        <input name="name" placeholder="Full Name" required><br><br>
+
+        <input name="skill" placeholder="Skill (e.g. Carpenter)" required><br><br>
+
+        <input name="phone" placeholder="Phone Number" required><br><br>
+
+        <input name="location" placeholder="Location" required><br><br>
+
+        <input name="experience" placeholder="Experience"><br><br>
+
+        <textarea name="description"
+        placeholder="Tell us about your work"></textarea><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+    """
 if __name__ == "__main__":
     app.run()
