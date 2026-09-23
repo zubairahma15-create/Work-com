@@ -328,26 +328,230 @@ def register():
         conn.close()
 
         return "Worker registered successfully!"
+        
+            return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    return """
-    <h1>Register as a Worker</h1>
+    <title>Register - Work.com</title>
 
-    <form method="POST">
-        <input name="name" placeholder="Full Name" required><br><br>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        <input name="skill" placeholder="Skill (e.g. Carpenter)" required><br><br>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
 
-        <input name="phone" placeholder="Phone Number" required><br><br>
+        header {
+            background: #0d47a1;
+            color: white;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        <input name="location" placeholder="Location" required><br><br>
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+        }
 
-        <input name="experience" placeholder="Experience"><br><br>
+        .home-link {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
 
-        <textarea name="description"
-        placeholder="Tell us about your work"></textarea><br><br>
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 0 18px;
+        }
 
-        <button type="submit">Register</button>
-    </form>
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+            margin-top: 18px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .register-btn {
+            width: 100%;
+            margin-top: 28px;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: #0d47a1;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .register-btn:hover {
+            background: #083b88;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            padding: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .form-card {
+                padding: 22px;
+            }
+
+            header {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">Work.com</div>
+    <a href="/" class="home-link">← Home</a>
+</header>
+
+<div class="container">
+
+    <div class="form-card">
+
+        <h1>👷 Register as a Worker</h1>
+
+        <p class="subtitle">
+            Create your worker profile on Work.com
+        </p>
+
+        <form method="POST">
+
+            <label for="name">Full Name</label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Enter your full name"
+                required
+            >
+
+            <label for="skill">Your Skill</label>
+            <select id="skill" name="skill" required>
+                <option value="">Select your skill</option>
+                <option value="Carpenter">Carpenter</option>
+                <option value="Mechanic">Mechanic</option>
+                <option value="Electrician">Electrician</option>
+                <option value="Plumber">Plumber</option>
+                <option value="Painter">Painter</option>
+                <option value="Mason">Mason</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="phone">Phone Number</label>
+            <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="Enter your phone number"
+                required
+            >
+
+            <label for="location">Location</label>
+            <input
+                type="text"
+                id="location"
+                name="location"
+                placeholder="City / Area"
+                required
+            >
+
+            <label for="experience">Years of Experience</label>
+            <input
+                type="text"
+                id="experience"
+                name="experience"
+                placeholder="Example: 5 years"
+            >
+
+            <label for="description">About Your Work</label>
+            <textarea
+                id="description"
+                name="description"
+                placeholder="Tell customers about your skills and experience"
+            ></textarea>
+
+            <button type="submit" class="register-btn">
+                Register Now
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Work.com — Connecting People with Skilled Workers
+</footer>
+
+</body>
+</html>
     """
+
+    
 if __name__ == "__main__":
     app.run()
