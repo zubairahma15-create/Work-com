@@ -3,3 +3,6 @@ import sqlite3
 import os
 
 app = Flask(__name__)
+@app.route("/")
+def home():
+    return "Welcome to Work.com!"
