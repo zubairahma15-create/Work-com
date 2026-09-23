@@ -1,6 +1,18 @@
 from flask import Flask, request
+from supabase import create_client
+import os
+from html import escape
 
 app = Flask(__name__)
+
+# Supabase connection
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+supabase = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY
+)
 
 
 @app.route("/")
@@ -14,7 +26,11 @@ def home():
   <title>Work.com - Find Skilled Workers</title>
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: Arial, sans-serif;
@@ -334,6 +350,7 @@ def home():
 
       <div>
         <h2>Are you a skilled worker?</h2>
+
         <p>
           Register your skills and let customers find your services.
         </p>
@@ -411,7 +428,8 @@ def register():
             font-weight: 600;
         }
 
-        input, textarea {
+        input,
+        textarea {
             width: 100%;
             padding: 13px;
             margin-top: 7px;
@@ -501,12 +519,82 @@ def register():
 </html>
 """
 
-    name = request.form.get("name", "")
-    skill = request.form.get("skill", "")
-    phone = request.form.get("phone", "")
-    location = request.form.get("location", "")
-    experience = request.form.get("experience", "")
-    description = request.form.get("description", "")
+    # Get form data
+    name = request.form.get("name", "").strip()
+    skill = request.form.get("skill", "").strip()
+    phone = request.form.get("phone", "").strip()
+    location = request.form.get("location", "").strip()
+    experience = request.form.get("experience", "").strip()
+    description = request.form.get("description", "").strip()
+
+    # Save worker permanently in Supabase
+    try:
+        supabase.table("workers").insert({
+            "name": name,
+            "skill": skill,
+            "phone": phone,
+            "location": location,
+            "experience": experience,
+            "description": description
+        }).execute()
+
+    except Exception as e:
+        print("Supabase error:", e)
+
+        return """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work.com - Error</title>
+</head>
+
+<body style="
+    font-family: Arial;
+    background:#f7f9fc;
+    text-align:center;
+    padding:40px;
+">
+
+    <div style="
+        background:white;
+        max-width:550px;
+        margin:auto;
+        padding:30px;
+        border-radius:15px;
+    ">
+
+        <h1 style="color:#1769e0;">Work.com</h1>
+
+        <h2>Registration could not be saved</h2>
+
+        <p>
+            Please try again in a moment.
+        </p>
+
+        <br>
+
+        <a href="/register" style="
+            display:inline-block;
+            background:#1769e0;
+            color:white;
+            padding:12px 22px;
+            border-radius:8px;
+            text-decoration:none;
+            font-weight:bold;
+        ">
+            Try Again
+        </a>
+
+    </div>
+
+</body>
+</html>
+"""
+
+    # Escape values before displaying them in HTML
+    safe_name = escape(name)
+    safe_skill = escape(skill)
 
     return f"""
 <!DOCTYPE html>
@@ -516,20 +604,33 @@ def register():
     <title>Work.com - Registration Successful</title>
 </head>
 
-<body style="font-family: Arial; background:#f7f9fc; text-align:center; padding:40px;">
+<body style="
+    font-family: Arial;
+    background:#f7f9fc;
+    text-align:center;
+    padding:40px;
+">
 
-    <div style="background:white; max-width:550px; margin:auto; padding:30px; border-radius:15px;">
+    <div style="
+        background:white;
+        max-width:550px;
+        margin:auto;
+        padding:30px;
+        border-radius:15px;
+    ">
 
         <h1 style="color:#1769e0;">Work.com</h1>
 
         <h2>Registration Successful! 🎉</h2>
 
-        <p><strong>Name:</strong> {name}</p>
-        <p><strong>Skill:</strong> {skill}</p>
-        <p><strong>Phone:</strong> {phone}</p>
-        <p><strong>Location:</strong> {location}</p>
-        <p><strong>Experience:</strong> {experience}</p>
-        <p><strong>Description:</strong> {description}</p>
+        <p>
+            Thank you, <strong>{safe_name}</strong>.
+        </p>
+
+        <p>
+            Your <strong>{safe_skill}</strong> worker registration
+            has been saved successfully.
+        </p>
 
         <br>
 
