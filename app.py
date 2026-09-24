@@ -277,11 +277,11 @@ def home():
       painters and other skilled professionals.
     </p>
 
-    <form class="search-box">
-      <input type="text" placeholder="What service do you need?">
-      <input type="text" placeholder="Enter your location">
-      <button class="search-btn" type="button">Search Workers</button>
-    </form>
+    <<form class="search-box" method="GET" action="/search">
+  <input type="text" name="skill" placeholder="What service do you need?">
+  <input type="text" name="location" placeholder="Enter your location">
+  <button class="search-btn" type="submit">Search Workers</button>
+</form>
   </section>
 
   <section id="services">
