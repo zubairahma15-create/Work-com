@@ -652,6 +652,110 @@ def register():
 </html>
 """
 
+@app.route("/search")
+def search():
 
+    skill = request.args.get("skill", "").strip()
+    location = request.args.get("location", "").strip()
+
+    try:
+        query = supabase.table("workers").select("*")
+
+        if skill:
+            query = query.ilike("skill", f"%{skill}%")
+
+        if location:
+            query = query.ilike("location", f"%{location}%")
+
+        result = query.order("created_at", desc=True).execute()
+        workers = result.data
+
+    except Exception as e:
+        print("Search error:", e)
+        return "<h2>Unable to search workers. Please try again.</h2>"
+
+    cards = ""
+
+    for worker in workers:
+        cards += f"""
+        <div style="
+            background:white;
+            padding:20px;
+            margin:15px auto;
+            max-width:600px;
+            border-radius:12px;
+            box-shadow:0 3px 15px rgba(0,0,0,.08);
+        ">
+            <h2>{escape(worker.get("name", ""))}</h2>
+            <p><strong>Skill:</strong> {escape(worker.get("skill", ""))}</p>
+            <p><strong>Location:</strong> {escape(worker.get("location", ""))}</p>
+            <p><strong>Experience:</strong> {escape(worker.get("experience", ""))}</p>
+            <p>{escape(worker.get("description", ""))}</p>
+            <p><strong>Phone:</strong> {escape(worker.get("phone", ""))}</p>
+        </div>
+        """
+
+    if not cards:
+        cards = """
+        <div style="
+            background:white;
+            padding:30px;
+            max-width:600px;
+            margin:20px auto;
+            border-radius:12px;
+            text-align:center;
+        ">
+            <h2>No workers found</h2>
+            <p>Try another skill or location.</p>
+        </div>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Work.com - Search Workers</title>
+    </head>
+
+    <body style="
+        font-family:Arial;
+        background:#f7f9fc;
+        margin:0;
+        padding:30px;
+    ">
+
+        <h1 style="
+            text-align:center;
+            color:#1769e0;
+        ">Work.com</h1>
+
+        <h2 style="text-align:center;">
+            Available Workers
+        </h2>
+
+        {cards}
+
+        <div style="text-align:center; margin-top:25px;">
+            <a href="/" style="
+                display:inline-block;
+                background:#1769e0;
+                color:white;
+                padding:12px 22px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:bold;
+            ">
+                ← Back to Home
+            </a>
+        </div>
+
+    </body>
+    </html>
+    """
+
+
+if __name__ == "__main__":
+    app.run()
 if __name__ == "__main__":
     app.run()
