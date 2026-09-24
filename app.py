@@ -754,6 +754,107 @@ def search():
     </html>
     """
 
+@app.route("/workers")
+def workers():
 
+    try:
+        result = supabase.table("workers").select("*").order("created_at", desc=True).execute()
+        worker_list = result.data
+
+    except Exception as e:
+        print("Workers error:", e)
+        return "<h2>Unable to load workers. Please try again.</h2>"
+
+    cards = ""
+
+    for worker in worker_list:
+        cards += f"""
+        <div style="
+            background:white;
+            padding:20px;
+            margin:15px auto;
+            max-width:600px;
+            border-radius:12px;
+            box-shadow:0 3px 15px rgba(0,0,0,.08);
+        ">
+            <h2>{escape(worker.get("name", ""))}</h2>
+            <p><strong>Skill:</strong> {escape(worker.get("skill", ""))}</p>
+            <p><strong>Location:</strong> {escape(worker.get("location", ""))}</p>
+            <p><strong>Experience:</strong> {escape(worker.get("experience", ""))}</p>
+            <p>{escape(worker.get("description", ""))}</p>
+
+            <a href="tel:{escape(worker.get("phone", ""))}" style="
+                display:inline-block;
+                background:#1769e0;
+                color:white;
+                padding:10px 18px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:bold;
+            ">
+                📞 Contact Worker
+            </a>
+        </div>
+        """
+
+    if not cards:
+        cards = """
+        <div style="
+            background:white;
+            padding:30px;
+            max-width:600px;
+            margin:20px auto;
+            border-radius:12px;
+            text-align:center;
+        ">
+            <h2>No workers registered yet.</h2>
+        </div>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Work.com - Workers</title>
+    </head>
+
+    <body style="
+        font-family:Arial;
+        background:#f7f9fc;
+        margin:0;
+        padding:30px;
+    ">
+
+        <h1 style="
+            text-align:center;
+            color:#1769e0;
+        ">
+            Work.com
+        </h1>
+
+        <h2 style="text-align:center;">
+            Skilled Workers
+        </h2>
+
+        {cards}
+
+        <div style="text-align:center; margin-top:25px;">
+            <a href="/" style="
+                display:inline-block;
+                background:#1769e0;
+                color:white;
+                padding:12px 22px;
+                border-radius:8px;
+                text-decoration:none;
+                font-weight:bold;
+            ">
+                ← Back to Home
+            </a>
+        </div>
+
+    </body>
+    </html>
+    """
 if __name__ == "__main__":
     app.run()
