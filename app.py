@@ -647,217 +647,335 @@ footer strong {
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
-    if request.method == "GET":
-        return """
+    return """
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Work.com - Worker Registration</title>
+<meta charset="UTF-8">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f9fc;
-            margin: 0;
-            padding: 0;
-        }
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-        header {
-            background: white;
-            padding: 20px 7%;
-            border-bottom: 1px solid #e8ecf2;
-        }
+<title>Work.com - Register as a Worker</title>
 
-        .logo {
-            font-size: 25px;
-            font-weight: 800;
-            color: #1769e0;
-        }
+<style>
 
-        .container {
-            max-width: 550px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 25px rgba(0,0,0,.08);
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        h1 {
-            text-align: center;
-            color: #172033;
-        }
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+}
 
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: 600;
-        }
+/* HEADER */
 
-        input,
-        textarea {
-            width: 100%;
-            padding: 13px;
-            margin-top: 7px;
-            border: 1px solid #d9e0ea;
-            border-radius: 8px;
-            box-sizing: border-box;
-        }
+header {
+    background: white;
+    padding: 18px 7%;
+    border-bottom: 1px solid #e5e9f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        button {
-            width: 100%;
-            margin-top: 25px;
-            padding: 14px;
-            background: #1769e0;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
-        }
+.logo {
+    font-size: 27px;
+    font-weight: 800;
+    color: #1769e0;
+}
 
-        .back {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #1769e0;
-            text-decoration: none;
-        }
-    </style>
+.home-link {
+    color: #1769e0;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* PAGE */
+
+.container {
+    max-width: 650px;
+    margin: 45px auto;
+    padding: 0 20px;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.intro h1 {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.intro p {
+    color: #667085;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* FORM */
+
+.form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 18px;
+    border: 1px solid #e5e9f0;
+    box-shadow: 0 8px 25px rgba(16,24,40,.07);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    outline: none;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #1769e0;
+    box-shadow: 0 0 0 3px #eaf3ff;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.hint {
+    display: block;
+    color: #667085;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.register-btn {
+    width: 100%;
+    border: none;
+    background: #1769e0;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.register-btn:hover {
+    background: #1258bd;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    header {
+        padding: 16px 5%;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .container {
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+
+    .intro h1 {
+        font-size: 29px;
+    }
+
+    .form-card {
+        padding: 22px;
+        border-radius: 15px;
+    }
+
+    input,
+    textarea {
+        font-size: 16px;
+        padding: 14px;
+    }
+
+}
+
+</style>
+
 </head>
 
 <body>
 
 <header>
-    <div class="logo">Work.com</div>
+
+    <div class="logo">
+        Work.com
+    </div>
+
+    <a class="home-link" href="/">
+        ← Home
+    </a>
+
 </header>
+
 
 <div class="container">
 
-    <h1>Worker Registration</h1>
+    <div class="intro">
 
-    <form method="POST" action="/register">
+        <h1>Register as a Worker</h1>
 
-        <label>Full Name</label>
-        <input type="text" name="name" required>
+        <p>
+            Create your worker profile and let customers
+            find your services on Work.com.
+        </p>
 
-        <label>Skill / Profession</label>
-        <input
-            type="text"
-            name="skill"
-            placeholder="Carpenter, Mechanic, Electrician..."
-            required
-        >
+    </div>
 
-        <label>Phone Number</label>
-        <input type="tel" name="phone" required>
 
-        <label>Location</label>
-        <input type="text" name="location" required>
+    <div class="form-card">
 
-        <label>Experience</label>
-        <input
-            type="text"
-            name="experience"
-            placeholder="Example: 5 years"
-        >
+        <form method="POST">
 
-        <label>Description</label>
-        <textarea
-            name="description"
-            rows="4"
-            placeholder="Describe your work and services"
-        ></textarea>
+            <div class="form-group">
 
-        <button type="submit">
-            Register as Worker
-        </button>
+                <label for="name">
+                    Full Name
+                </label>
 
-    </form>
+                <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    placeholder="Enter your full name"
+                    required
+                >
 
-    <a class="back" href="/">
-        ← Back to Work.com
-    </a>
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="skill">
+                    Skill / Profession
+                </label>
+
+                <input
+                    id="skill"
+                    type="text"
+                    name="skill"
+                    placeholder="e.g. Carpenter, Electrician"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="phone">
+                    Phone Number
+                </label>
+
+                <input
+                    id="phone"
+                    type="tel"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="location">
+                    Location
+                </label>
+
+                <input
+                    id="location"
+                    type="text"
+                    name="location"
+                    placeholder="e.g. Srinagar"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="experience">
+                    Experience
+                </label>
+
+                <input
+                    id="experience"
+                    type="text"
+                    name="experience"
+                    placeholder="e.g. 5 years"
+                >
+
+                <span class="hint">
+                    Tell customers how experienced you are.
+                </span>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="description">
+                    About Your Work
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Describe your services and the type of work you provide..."
+                ></textarea>
+
+            </div>
+
+
+            <button
+                class="register-btn"
+                type="submit">
+
+                ✓ Register as Worker
+
+            </button>
+
+        </form>
+
+    </div>
 
 </div>
 
 </body>
-</html>
-"""
 
-    # Get form data
-    name = request.form.get("name", "").strip()
-    skill = request.form.get("skill", "").strip()
-    phone = request.form.get("phone", "").strip()
-    location = request.form.get("location", "").strip()
-    experience = request.form.get("experience", "").strip()
-    description = request.form.get("description", "").strip()
-
-    # Save worker permanently in Supabase
-    try:
-        supabase.table("workers").insert({
-            "name": name,
-            "skill": skill,
-            "phone": phone,
-            "location": location,
-            "experience": experience,
-            "description": description
-        }).execute()
-
-    except Exception as e:
-        print("Supabase error:", e)
-
-        return """
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work.com - Error</title>
-</head>
-
-<body style="
-    font-family: Arial;
-    background:#f7f9fc;
-    text-align:center;
-    padding:40px;
-">
-
-    <div style="
-        background:white;
-        max-width:550px;
-        margin:auto;
-        padding:30px;
-        border-radius:15px;
-    ">
-
-        <h1 style="color:#1769e0;">Work.com</h1>
-
-        <h2>Registration could not be saved</h2>
-
-        <p>
-            Please try again in a moment.
-        </p>
-
-        <br>
-
-        <a href="/register" style="
-            display:inline-block;
-            background:#1769e0;
-            color:white;
-            padding:12px 22px;
-            border-radius:8px;
-            text-decoration:none;
-            font-weight:bold;
-        ">
-            Try Again
-        </a>
-
-    </div>
-
-</body>
 </html>
 """
 
