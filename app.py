@@ -17,360 +17,629 @@ supabase = create_client(
 
 @app.route("/")
 def home():
+
     return """
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Work.com - Find Skilled Workers</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8">
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f9fc;
-      color: #172033;
-      line-height: 1.6;
-    }
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Work.com - Find Skilled Workers</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f9fc;
+    color: #172033;
+}
+
+/* HEADER */
+
+header {
+    background: white;
+    padding: 18px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e9f0;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1769e0;
+}
+
+nav {
+    display: flex;
+    gap: 25px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #344054;
+    font-weight: 600;
+}
+
+nav a:hover {
+    color: #1769e0;
+}
+
+/* HERO */
+
+.hero {
+    background: #eef6ff;
+    padding: 65px 7%;
+}
+
+.hero-content {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.badge {
+    display: inline-block;
+    background: #e2efff;
+    color: #1769e0;
+    padding: 9px 16px;
+    border-radius: 25px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 48px;
+    max-width: 650px;
+    line-height: 1.1;
+    margin-bottom: 18px;
+}
+
+.hero h1 span {
+    color: #1769e0;
+}
+
+.hero p {
+    color: #667085;
+    font-size: 19px;
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 30px;
+}
+
+/* SEARCH */
+
+.search-box {
+    background: white;
+    max-width: 750px;
+    padding: 10px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(16,24,40,.08);
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    border: 1px solid #e4e7ec;
+    border-radius: 9px;
+    padding: 15px;
+    font-size: 15px;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: #1769e0;
+}
+
+.search-btn {
+    border: none;
+    background: #1769e0;
+    color: white;
+    padding: 0 25px;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+/* SECTIONS */
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 60px 20px;
+}
+
+.section-label {
+    color: #1769e0;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.section-title {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.section-text {
+    color: #667085;
+    font-size: 17px;
+    margin-bottom: 30px;
+}
+
+/* CATEGORY CARDS */
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.category-card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid #e5e9f0;
+    box-shadow: 0 5px 20px rgba(16,24,40,.05);
+    text-decoration: none;
+    color: #172033;
+    transition: .2s;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(16,24,40,.10);
+}
+
+.category-icon {
+    width: 55px;
+    height: 55px;
+    background: #eaf3ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 18px;
+}
+
+.category-card h3 {
+    margin-bottom: 8px;
+    font-size: 20px;
+}
+
+.category-card p {
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* HOW IT WORKS */
+
+.how-box {
+    background: #eef6ff;
+    border-radius: 18px;
+    padding: 40px;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    text-align: center;
+}
+
+.step-icon {
+    width: 60px;
+    height: 60px;
+    background: #dcecff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+    margin: 0 auto 15px;
+}
+
+.step h3 {
+    margin-bottom: 8px;
+}
+
+.step p {
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* CTA */
+
+.cta {
+    max-width: 1100px;
+    margin: 0 auto 60px;
+    background: #1769e0;
+    color: white;
+    padding: 35px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cta h2 {
+    margin-bottom: 7px;
+}
+
+.cta p {
+    color: #dbeafe;
+}
+
+.cta a {
+    background: white;
+    color: #1769e0;
+    padding: 14px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+/* FOOTER */
+
+footer {
+    background: #101828;
+    color: #cbd5e1;
+    padding: 30px 7%;
+    display: flex;
+    justify-content: space-between;
+}
+
+footer strong {
+    color: white;
+    font-size: 20px;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
 
     header {
-      background: #ffffff;
-      border-bottom: 1px solid #e8ecf2;
-      padding: 18px 7%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .logo {
-      font-size: 25px;
-      font-weight: 800;
-      color: #1769e0;
+        padding: 16px 5%;
     }
 
     nav {
-      display: flex;
-      gap: 24px;
-      align-items: center;
+        gap: 12px;
     }
 
     nav a {
-      text-decoration: none;
-      color: #344054;
-      font-weight: 600;
-    }
-
-    .nav-btn {
-      background: #1769e0;
-      color: white;
-      padding: 10px 17px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 700;
+        font-size: 13px;
     }
 
     .hero {
-      padding: 75px 7% 65px;
-      text-align: center;
-      background: linear-gradient(135deg, #eaf3ff, #ffffff);
+        padding: 45px 20px;
     }
 
     .hero h1 {
-      font-size: clamp(35px, 6vw, 58px);
-      margin-bottom: 16px;
-    }
-
-    .hero h1 span {
-      color: #1769e0;
-    }
-
-    .hero p {
-      max-width: 680px;
-      margin: 0 auto 30px;
-      color: #5b667a;
-      font-size: 18px;
+        font-size: 36px;
     }
 
     .search-box {
-      max-width: 850px;
-      margin: auto;
-      background: white;
-      padding: 12px;
-      border-radius: 14px;
-      box-shadow: 0 10px 35px rgba(23, 44, 78, .12);
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 10px;
-    }
-
-    .search-box input {
-      border: 1px solid #d9e0ea;
-      border-radius: 9px;
-      padding: 14px;
-      font-size: 15px;
-      width: 100%;
+        flex-direction: column;
     }
 
     .search-btn {
-      border: 0;
-      background: #1769e0;
-      color: white;
-      padding: 0 24px;
-      border-radius: 9px;
-      font-weight: 700;
-      cursor: pointer;
+        padding: 14px;
     }
 
-    section {
-      padding: 60px 7%;
+    .category-grid {
+        grid-template-columns: 1fr;
     }
 
-    .section-title {
-      text-align: center;
-      margin-bottom: 35px;
+    .steps {
+        grid-template-columns: 1fr;
     }
 
-    .section-title h2 {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-
-    .section-title p {
-      color: #667085;
-    }
-
-    .services {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-      max-width: 1100px;
-      margin: auto;
-    }
-
-    .card {
-      background: white;
-      padding: 28px 18px;
-      border-radius: 14px;
-      text-align: center;
-      border: 1px solid #e8ecf2;
-    }
-
-    .icon {
-      font-size: 38px;
-      margin-bottom: 10px;
-    }
-
-    .card h3 {
-      margin-bottom: 5px;
-    }
-
-    .card p {
-      color: #667085;
-      font-size: 14px;
-    }
-
-    .worker-cta {
-      max-width: 1100px;
-      margin: auto;
-      background: #1769e0;
-      color: white;
-      padding: 45px;
-      border-radius: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 25px;
-    }
-
-    .worker-cta p {
-      color: #dceaff;
-      margin-top: 6px;
-    }
-
-    .register-btn {
-      background: white;
-      color: #1769e0;
-      text-decoration: none;
-      padding: 13px 22px;
-      border-radius: 9px;
-      font-weight: 800;
-      white-space: nowrap;
+    .cta {
+        margin: 0 20px 40px;
+        flex-direction: column;
+        gap: 25px;
+        text-align: center;
     }
 
     footer {
-      text-align: center;
-      padding: 25px;
-      background: #101828;
-      color: #cbd5e1;
-      font-size: 14px;
-    }
-
-    @media (max-width: 800px) {
-      nav a:not(.nav-btn) {
-        display: none;
-      }
-
-      .search-box {
-        grid-template-columns: 1fr;
-      }
-
-      .search-btn {
-        padding: 14px;
-      }
-
-      .services {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .worker-cta {
         flex-direction: column;
+        gap: 10px;
         text-align: center;
-      }
     }
+}
 
-    @media (max-width: 480px) {
-      .services {
-        grid-template-columns: 1fr;
-      }
+</style>
 
-      header {
-        padding: 16px 5%;
-      }
-
-      section {
-        padding: 45px 5%;
-      }
-
-      .hero {
-        padding: 55px 5%;
-      }
-    }
-  </style>
 </head>
 
 <body>
 
 <header>
-  <div class="logo">Work.com</div>
 
-  <nav>
-    <a href="/">Home</a>
-    <a href="#services">Services</a>
-    <a href="/register" class="nav-btn">Register as Worker</a>
-  </nav>
+    <div class="logo">
+        Work.com
+    </div>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/workers">Workers</a>
+        <a href="/register">Register</a>
+    </nav>
+
 </header>
 
-<main>
 
-  <section class="hero">
-    <h1>Find Skilled Workers <span>Near You</span></h1>
+<section class="hero">
+
+<div class="hero-content">
+
+    <div class="badge">
+        🛡️ Trusted · Skilled · Local
+    </div>
+
+    <h1>
+        Find <span>Skilled Workers</span>
+        for Your Work
+    </h1>
 
     <p>
-      Connect with local carpenters, electricians, plumbers, mechanics,
-      painters and other skilled professionals.
+        Connect with trusted local professionals
+        for your home and business needs.
     </p>
 
-    <<form class="search-box" method="GET" action="/search">
-  <input type="text" name="skill" placeholder="What service do you need?">
-  <input type="text" name="location" placeholder="Enter your location">
-  <button class="search-btn" type="submit">Search Workers</button>
-</form>
-  </section>
+    <form class="search-box"
+          method="GET"
+          action="/search">
 
-  <section id="services">
+        <input
+            type="text"
+            name="skill"
+            placeholder="Skill (e.g. plumber, carpenter)"
+        >
 
-    <div class="section-title">
-      <h2>Popular Services</h2>
-      <p>Find the right professional for your work.</p>
+        <input
+            type="text"
+            name="location"
+            placeholder="Location"
+        >
+
+        <button
+            class="search-btn"
+            type="submit">
+            🔍 Search
+        </button>
+
+    </form>
+
+</div>
+
+</section>
+
+
+<section class="container">
+
+    <div class="section-label">
+        OUR SERVICES
     </div>
 
-    <div class="services">
+    <h2 class="section-title">
+        Popular Categories
+    </h2>
 
-      <div class="card">
-        <div class="icon">🔨</div>
-        <h3>Carpenter</h3>
-        <p>Furniture & woodwork</p>
-      </div>
+    <p class="section-text">
+        Find the right professional for your specific needs.
+    </p>
 
-      <div class="card">
-        <div class="icon">⚡</div>
-        <h3>Electrician</h3>
-        <p>Electrical repair & installation</p>
-      </div>
 
-      <div class="card">
-        <div class="icon">🚰</div>
-        <h3>Plumber</h3>
-        <p>Water & pipe services</p>
-      </div>
+    <div class="category-grid">
 
-      <div class="card">
-        <div class="icon">🔧</div>
-        <h3>Mechanic</h3>
-        <p>Vehicle repair & maintenance</p>
-      </div>
+        <a class="category-card"
+           href="/search?skill=Carpenter">
 
-      <div class="card">
-        <div class="icon">🧱</div>
-        <h3>Mason</h3>
-        <p>Construction & brickwork</p>
-      </div>
+            <div class="category-icon">🔨</div>
 
-      <div class="card">
-        <div class="icon">🎨</div>
-        <h3>Painter</h3>
-        <p>Home & commercial painting</p>
-      </div>
+            <h3>Carpenter</h3>
 
-      <div class="card">
-        <div class="icon">❄️</div>
-        <h3>AC Technician</h3>
-        <p>AC repair & servicing</p>
-      </div>
+            <p>
+                Furniture & woodwork
+            </p>
 
-      <div class="card">
-        <div class="icon">🛠️</div>
-        <h3>Other Services</h3>
-        <p>More skilled professionals</p>
-      </div>
+        </a>
+
+
+        <a class="category-card"
+           href="/search?skill=Electrician">
+
+            <div class="category-icon">⚡</div>
+
+            <h3>Electrician</h3>
+
+            <p>
+                Electrical repair & installation
+            </p>
+
+        </a>
+
+
+        <a class="category-card"
+           href="/search?skill=Plumber">
+
+            <div class="category-icon">🚰</div>
+
+            <h3>Plumber</h3>
+
+            <p>
+                Water & pipe services
+            </p>
+
+        </a>
+
+
+        <a class="category-card"
+           href="/search?skill=Mechanic">
+
+            <div class="category-icon">🔧</div>
+
+            <h3>Mechanic</h3>
+
+            <p>
+                Vehicle repair & maintenance
+            </p>
+
+        </a>
+
+
+        <a class="category-card"
+           href="/search?skill=Painter">
+
+            <div class="category-icon">🎨</div>
+
+            <h3>Painter</h3>
+
+            <p>
+                Interior & exterior painting
+            </p>
+
+        </a>
+
+
+        <a class="category-card"
+           href="/search?skill=Mason">
+
+            <div class="category-icon">🧱</div>
+
+            <h3>Mason</h3>
+
+            <p>
+                Construction & brickwork
+            </p>
+
+        </a>
 
     </div>
-  </section>
 
-  <section id="register">
+</section>
 
-    <div class="worker-cta">
 
-      <div>
-        <h2>Are you a skilled worker?</h2>
+<section class="container">
+
+    <div class="how-box">
+
+        <div class="section-label">
+            HOW IT WORKS
+        </div>
+
+        <h2 class="section-title">
+            Get Started in 3 Simple Steps
+        </h2>
+
+
+        <div class="steps">
+
+            <div class="step">
+
+                <div class="step-icon">
+                    👤
+                </div>
+
+                <h3>1. Register</h3>
+
+                <p>
+                    Register as a skilled worker
+                    in just a few minutes.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    🔍
+                </div>
+
+                <h3>2. Find Workers</h3>
+
+                <p>
+                    Search workers by skill
+                    and location.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    ✓
+                </div>
+
+                <h3>3. Contact</h3>
+
+                <p>
+                    Contact the worker
+                    directly.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="cta">
+
+    <div>
+
+        <h2>
+            Ready to get your work done?
+        </h2>
 
         <p>
-          Register your skills and let customers find your services.
+            Register your skills on Work.com today.
         </p>
-      </div>
-
-      <a class="register-btn" href="/register">
-        Register Now
-      </a>
 
     </div>
 
-  </section>
+    <a href="/register">
+        Register Now
+    </a>
 
-</main>
+</section>
+
 
 <footer>
-  © 2026 Work.com · Connecting customers with skilled workers
+
+    <strong>
+        Work.com
+    </strong>
+
+    <span>
+        © 2026 Work.com · Connecting customers
+        with skilled workers
+    </span>
+
 </footer>
 
 </body>
+
 </html>
 """
 
