@@ -753,108 +753,365 @@ def search():
     </body>
     </html>
     """
-
 @app.route("/workers")
 def workers():
 
     try:
-        result = supabase.table("workers").select("*").order("created_at", desc=True).execute()
+        result = (
+            supabase
+            .table("workers")
+            .select("*")
+            .order("created_at", desc=True)
+            .execute()
+        )
+
         worker_list = result.data
 
     except Exception as e:
         print("Workers error:", e)
-        return "<h2>Unable to load workers. Please try again.</h2>"
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Unable to load workers. Please try again.
+        </h2>
+        """
 
     cards = ""
 
     for worker in worker_list:
-        cards += f"""
-        <div style="
-            background:white;
-            padding:20px;
-            margin:15px auto;
-            max-width:600px;
-            border-radius:12px;
-            box-shadow:0 3px 15px rgba(0,0,0,.08);
-        ">
-            <h2>{escape(worker.get("name", ""))}</h2>
-            <p><strong>Skill:</strong> {escape(worker.get("skill", ""))}</p>
-            <p><strong>Location:</strong> {escape(worker.get("location", ""))}</p>
-            <p><strong>Experience:</strong> {escape(worker.get("experience", ""))}</p>
-            <p>{escape(worker.get("description", ""))}</p>
 
-            <a href="tel:{escape(worker.get("phone", ""))}" style="
-                display:inline-block;
-                background:#1769e0;
-                color:white;
-                padding:10px 18px;
-                border-radius:8px;
-                text-decoration:none;
-                font-weight:bold;
-            ">
+        name = escape(worker.get("name", ""))
+        skill = escape(worker.get("skill", ""))
+        location = escape(worker.get("location", ""))
+        experience = escape(worker.get("experience", ""))
+        description = escape(worker.get("description", ""))
+        phone = escape(worker.get("phone", ""))
+
+        cards += f"""
+        <div class="worker-card">
+
+            <div class="worker-top">
+
+                <div class="worker-avatar">
+                    {name[:1].upper()}
+                </div>
+
+                <div>
+                    <h2>{name}</h2>
+
+                    <span class="skill-badge">
+                        🔧 {skill}
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="worker-info">
+
+                <div class="info-item">
+                    <span>📍</span>
+                    <div>
+                        <small>Location</small>
+                        <strong>{location}</strong>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span>🕒</span>
+                    <div>
+                        <small>Experience</small>
+                        <strong>{experience or "Not specified"}</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="description">
+                {description or "Skilled professional available for work."}
+            </div>
+
+            <a class="contact-btn" href="tel:{phone}">
                 📞 Contact Worker
             </a>
+
         </div>
         """
 
     if not cards:
         cards = """
-        <div style="
-            background:white;
-            padding:30px;
-            max-width:600px;
-            margin:20px auto;
-            border-radius:12px;
-            text-align:center;
-        ">
-            <h2>No workers registered yet.</h2>
+        <div class="empty-box">
+            <div style="font-size:45px;">👷</div>
+            <h2>No workers registered yet</h2>
+            <p>Worker profiles will appear here after registration.</p>
         </div>
         """
 
     return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Work.com - Workers</title>
-    </head>
+<!DOCTYPE html>
+<html lang="en">
 
-    <body style="
-        font-family:Arial;
-        background:#f7f9fc;
-        margin:0;
-        padding:30px;
-    ">
+<head>
 
-        <h1 style="
-            text-align:center;
-            color:#1769e0;
-        ">
-            Work.com
-        </h1>
+<meta charset="UTF-8">
 
-        <h2 style="text-align:center;">
-            Skilled Workers
-        </h2>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Work.com - Skilled Workers</title>
+
+<style>
+
+* {{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}}
+
+body {{
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+}}
+
+header {{
+    background: white;
+    padding: 18px 7%;
+    border-bottom: 1px solid #e6eaf0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}}
+
+.logo {{
+    font-size: 25px;
+    font-weight: 800;
+    color: #1769e0;
+}}
+
+.home-btn {{
+    text-decoration: none;
+    color: #1769e0;
+    font-weight: 700;
+}}
+
+.hero {{
+    text-align: center;
+    padding: 45px 20px 30px;
+}}
+
+.hero h1 {{
+    font-size: 38px;
+    margin-bottom: 10px;
+}}
+
+.hero p {{
+    color: #667085;
+    font-size: 17px;
+}}
+
+.workers-container {{
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}}
+
+.worker-grid {{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+}}
+
+.worker-card {{
+    background: white;
+    border: 1px solid #e5e9f0;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 5px 20px rgba(16, 24, 40, .06);
+    transition: transform .2s, box-shadow .2s;
+}}
+
+.worker-card:hover {{
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(16, 24, 40, .10);
+}}
+
+.worker-top {{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}}
+
+.worker-avatar {{
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #eaf3ff;
+    color: #1769e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    font-weight: 800;
+}}
+
+.worker-top h2 {{
+    font-size: 21px;
+    margin-bottom: 7px;
+}}
+
+.skill-badge {{
+    display: inline-block;
+    background: #eef6ff;
+    color: #1769e0;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}}
+
+.worker-info {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+}}
+
+.info-item {{
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    background: #f8fafc;
+    padding: 11px;
+    border-radius: 10px;
+}}
+
+.info-item span {{
+    font-size: 20px;
+}}
+
+.info-item small {{
+    display: block;
+    color: #667085;
+    font-size: 11px;
+    margin-bottom: 3px;
+}}
+
+.info-item strong {{
+    font-size: 14px;
+}}
+
+.description {{
+    color: #667085;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 12px 0 18px;
+}}
+
+.contact-btn {{
+    display: block;
+    text-align: center;
+    background: #1769e0;
+    color: white;
+    padding: 13px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-weight: 700;
+}}
+
+.contact-btn:hover {{
+    background: #1258bd;
+}}
+
+.empty-box {{
+    background: white;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 45px 25px;
+    text-align: center;
+    border-radius: 18px;
+}}
+
+.empty-box p {{
+    color: #667085;
+    margin-top: 8px;
+}}
+
+footer {{
+    text-align: center;
+    padding: 30px;
+    margin-top: 40px;
+    background: #101828;
+    color: #cbd5e1;
+}}
+
+@media (max-width: 700px) {{
+
+    .worker-grid {{
+        grid-template-columns: 1fr;
+    }}
+
+    .hero h1 {{
+        font-size: 30px;
+    }}
+
+    .worker-info {{
+        grid-template-columns: 1fr;
+    }}
+
+    header {{
+        padding: 16px 5%;
+    }}
+
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        Work.com
+    </div>
+
+    <a class="home-btn" href="/">
+        ← Home
+    </a>
+
+</header>
+
+<section class="hero">
+
+    <h1>Skilled Workers</h1>
+
+    <p>
+        Find trusted local professionals for your work.
+    </p>
+
+</section>
+
+<div class="workers-container">
+
+    <div class="worker-grid">
 
         {cards}
 
-        <div style="text-align:center; margin-top:25px;">
-            <a href="/" style="
-                display:inline-block;
-                background:#1769e0;
-                color:white;
-                padding:12px 22px;
-                border-radius:8px;
-                text-decoration:none;
-                font-weight:bold;
-            ">
-                ← Back to Home
-            </a>
-        </div>
+    </div>
 
-    </body>
-    </html>
-    """
+</div>
+
+<footer>
+
+    © 2026 Work.com · Connecting customers with skilled workers
+
+</footer>
+
+</body>
+
+</html>
+"""
+
 if __name__ == "__main__":
     app.run()
