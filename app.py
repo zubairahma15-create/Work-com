@@ -125,7 +125,11 @@ def admin():
             </body>
             </html>
             """
-
+        except Exception as e:
+            return f"""
+            <h2>Admin Dashboard Error</h2>
+            <p>{str(e)}</p>
+            """, 500
     return """
     <!DOCTYPE html>
     <html>
