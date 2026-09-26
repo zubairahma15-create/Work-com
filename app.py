@@ -103,7 +103,13 @@ def admin():
             <body>
 
                 <h1>Work.com Admin Dashboard</h1>
-
+<input
+    type="text"
+    id="workerSearch"
+    oninput="filterWorkers()"
+    placeholder="Search by name, skill or location..."
+    style="width:100%; padding:14px; margin:15px 0; box-sizing:border-box; border:1px solid #ddd; border-radius:8px;"
+>
                 <div class="count">
                     <strong>Total Registered Workers:</strong>
                     {len(workers)}
@@ -121,7 +127,22 @@ def admin():
                     {rows}
 
                 </table>
+<script>
+function filterWorkers() {{
+    const search = document.getElementById("workerSearch").value.toLowerCase();
+    const rows = document.querySelectorAll("table tr");
 
+    for (let i = 1; i < rows.length; i++) {{
+        const text = rows[i].innerText.toLowerCase();
+
+        if (text.includes(search)) {{
+            rows[i].style.display = "";
+        }} else {{
+            rows[i].style.display = "none";
+        }}
+    }}
+}}
+</script>
             </body>
             </html>
             """
