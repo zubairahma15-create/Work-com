@@ -95,7 +95,147 @@ def admin_delete():
         <h2>Delete Error</h2>
         <p>{str(e)}</p>
         """, 500
-@app.route("/admin", methods=["GET", "POST"])
+        @app.route("/admin/edit/<worker_id>", methods=["GET", "POST"])
+def admin_edit(worker_id):
+
+    password = request.args.get("password", "")
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+
+    if password != os.environ.get("ADMIN_PASSWORD"):
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Admin Login</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body style="font-family:Arial;text-align:center;margin-top:60px;">
+            <h2>Admin access required</h2>
+            <p>Please return to the Admin page and open Edit from there.</p>
+            <a href="/admin">Back to Admin</a>
+        </body>
+        </html>
+        """, 401
+
+    if request.method == "GET":
+
+        result = (
+            supabase
+            .table("workers")
+            .select("*")
+            .eq("id", worker_id)
+            .single()
+            .execute()
+        )
+
+        worker = result.data
+
+        if not worker:
+            return "Worker not found", 404
+
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Edit Worker - Work.com</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+
+        <body style="font-family:Arial;background:#f4f7fb;padding:20px;">
+
+        <div style="max-width:500px;margin:auto;background:white;
+                    padding:25px;border-radius:15px;">
+
+            <h2>Edit Worker</h2>
+
+            <form method="POST">
+
+                <input type="hidden" name="password"
+                       value="{password}">
+
+                <label>Name</label>
+                <input name="name"
+                       value="{worker.get("name", "")}"
+                       style="width:100%;padding:12px;margin:8px 0 15px;">
+
+                <label>Skill</label>
+                <input name="skill"
+                       value="{worker.get("skill", "")}"
+                       style="width:100%;padding:12px;margin:8px 0 15px;">
+
+                <label>Phone</label>
+                <input name="phone"
+                       value="{worker.get("phone", "")}"
+                       style="width:100%;padding:12px;margin:8px 0 15px;">
+
+                <label>Location</label>
+                <input name="location"
+                       value="{worker.get("location", "")}"
+                       style="width:100%;padding:12px;margin:8px 0 15px;">
+
+                <label>Experience</label>
+                <input name="experience"
+                       value="{worker.get("experience", "")}"
+                       style="width:100%;padding:12px;margin:8px 0 15px;">
+
+                <label>Description</label>
+                <textarea name="description"
+                          style="width:100%;padding:12px;margin:8px 0 20px;">{worker.get("description", "")}</textarea>
+
+                <button type="submit"
+                        style="width:100%;padding:13px;
+                               background:#2563eb;color:white;
+                               border:none;border-radius:8px;">
+                    Save Changes
+                </button>
+
+            </form>
+
+            <p style="text-align:center;margin-top:20px;">
+                <a href="/admin">Back to Admin</a>
+            </p>
+
+        </div>
+
+        </body>
+        </html>
+        """
+
+    name = request.form.get("name", "")
+    skill = request.form.get("skill", "")
+    phone = request.form.get("phone", "")
+    location = request.form.get("location", "")
+    experience = request.form.get("experience", "")
+    description = request.form.get("description", "")
+
+    try:
+        supabase.table("workers").update({
+            "name": name,
+            "skill": skill,
+            "phone": phone,
+            "location": location,
+            "experience": experience,
+            "description": description
+        }).eq("id", worker_id).execute()
+
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body style="font-family:Arial;text-align:center;margin-top:60px;">
+            <h2>Worker updated successfully! ✅</h2>
+            <a href="/admin">Back to Admin</a>
+        </body>
+        </html>
+        """
+
+    except Exception as e:
+        return f"Error updating worker: {e}", 500
+@@app.route("/admin/delete", methods=["POST"]).route("/admin", methods=["GET", "POST"])
 def admin():
 
     if request.method == "POST":
@@ -133,14 +273,26 @@ def admin():
                 <td>{worker.get("location", "")}</td>
                 <td>{worker.get("experience", "")}</td>
                 <td>
-                    <form method="POST" action="/admin/delete"
-                          onsubmit="return confirm('Are you sure you want to delete this worker?');">
-                        <input type="hidden" name="worker_id" value="{worker.get("id", "")}">
-                        <button type="submit">
-                            Delete
-                        </button>
-                    </form>
-                </td>
+    <a href="/admin/edit/{worker.get("id", "")}"
+       style="display:inline-block;padding:8px 12px;
+              background:#2563eb;color:white;
+              text-decoration:none;border-radius:6px;
+              margin-right:5px;">
+        Edit
+    </a>
+
+    <form method="POST" action="/admin/delete"
+          style="display:inline;"
+          onsubmit="return confirm('Are you sure you want to delete this worker?');">
+        <input type="hidden" name="worker_id" value="{worker.get("id", "")}">
+        <button type="submit"
+                style="padding:8px 12px;
+                       background:#dc2626;color:white;
+                       border:none;border-radius:6px;">
+            Delete
+        </button>
+    </form>
+</td>
             </tr>
             """
 
