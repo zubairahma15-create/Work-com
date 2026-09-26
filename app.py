@@ -12,7 +12,201 @@ supabase = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
+# =========================================================
+# ADMIN LOGIN
+# =========================================================
 
+@app.route("/admin", methods=["GET", "POST"])
+def admin():
+
+    if request.method == "POST":
+
+        password = request.form.get("password", "")
+
+        if password != os.environ.get("ADMIN_PASSWORD"):
+            return """
+            <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
+                Incorrect password
+            </h2>
+            <p style="text-align:center;font-family:Arial;">
+                <a href="/admin">Try again</a>
+            </p>
+            """, 401
+
+        try:
+            result = (
+                supabase
+                .table("workers")
+                .select("*")
+                .order("created_at", desc=True)
+                .execute()
+            )
+
+            workers = result.data or []
+
+            rows = ""
+
+            for worker in workers:
+                rows += f"""
+                <tr>
+                    <td>{worker.get("name", "")}</td>
+                    <td>{worker.get("skill", "")}</td>
+                    <td>{worker.get("phone", "")}</td>
+                    <td>{worker.get("location", "")}</td>
+                    <td>{worker.get("experience", "")}</td>
+                </tr>
+                """
+
+            return f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Work.com Admin</title>
+                <style>
+                    body {{
+                        font-family: Arial;
+                        margin: 20px;
+                        background: #f5f7fa;
+                    }}
+
+                    h1 {{
+                        color: #1565c0;
+                    }}
+
+                    .count {{
+                        background: white;
+                        padding: 15px;
+                        border-radius: 10px;
+                        margin-bottom: 20px;
+                    }}
+
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        background: white;
+                    }}
+
+                    th, td {{
+                        padding: 12px;
+                        border-bottom: 1px solid #ddd;
+                        text-align: left;
+                    }}
+
+                    th {{
+                        background: #1565c0;
+                        color: white;
+                    }}
+                </style>
+            </head>
+
+            <body>
+
+                <h1>Work.com Admin Dashboard</h1>
+
+                <div class="count">
+                    <strong>Total Registered Workers:</strong>
+                    {len(workers)}
+                </div>
+
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Skill</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Experience</th>
+                    </tr>
+
+                    {rows}
+
+                </table>
+
+            </body>
+            </html>
+            """
+
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Work.com Admin Login</title>
+
+        <style>
+            body {
+                font-family: Arial;
+                background: #f5f7fa;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .box {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                width: 90%;
+                max-width: 400px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            }
+
+            h1 {
+                color: #1565c0;
+                text-align: center;
+            }
+
+            input {
+                width: 100%;
+                padding: 14px;
+                margin: 15px 0;
+                box-sizing: border-box;
+            }
+
+            button {
+                width: 100%;
+                padding: 14px;
+                background: #1565c0;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="box">
+
+            <h1>Work.com Admin</h1>
+
+            <form method="POST">
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Admin Password"
+                    required
+                >
+
+                <button type="submit">
+                    Login
+                </button>
+
+            </form>
+
+        </div>
+
+    </body>
+    </html>
+    """
+
+
+# =========================================================
+# HOME PAGE
+# =========================================================
 
 # =========================================================
 # HOME PAGE
