@@ -125,7 +125,7 @@ def admin():
 
             rows = ""
             for worker in workers:
-            rows += f"""
+                rows += f"""
             <tr>
                 <td>{worker.get("name", "")}</td>
                 <td>{worker.get("skill", "")}</td>
