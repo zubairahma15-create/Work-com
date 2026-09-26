@@ -1977,11 +1977,19 @@ def search():
 
 
             <a class="contact-btn"
-               href="tel:{phone}">
+   href="tel:{phone}">
 
-                📞 Contact Worker
+    📞 Call Worker
 
-            </a>
+</a>
+
+<a class="contact-btn"
+   href="https://wa.me/{phone}"
+   target="_blank">
+
+    💬 WhatsApp
+
+</a>
 
         </div>
         """
