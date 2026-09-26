@@ -26,7 +26,7 @@ def home():
 <html lang="en">
 
 <head>
-
+<meta name="google-site-verification" content="U5lX7y6Xwd0Ggm8ZcVTa34J3s-NFNDRAj_jgfTWZTAQ" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
