@@ -124,8 +124,7 @@ def admin():
             workers = result.data or []
 
             rows = ""
-
-        for worker in workers:
+            for worker in workers:
             rows += f"""
             <tr>
                 <td>{worker.get("name", "")}</td>
