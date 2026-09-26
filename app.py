@@ -1914,10 +1914,18 @@ def search():
         experience = escape(worker.get("experience") or "")
         description = escape(worker.get("description") or "")
         phone = escape(worker.get("phone") or "")
+        whatsapp_phone = "".join(
+    ch for ch in str(worker.get("phone") or "")
+    if ch.isdigit()
+)
+
+if len(whatsapp_phone) == 10:
+    whatsapp_phone = "91" + whatsapp_phone
 
         initial = escape(
             (worker.get("name") or "?")[:1].upper()
-        )
+        )href(worker.get("name") or "?")[:1].upper()
+        )href="https://wa.me/{phone}""https://wa.me/{phone}"
 
         cards += f"""
         <div class="worker-card">
