@@ -125,25 +125,25 @@ def admin():
 
             rows = ""
 
-            for worker in workers:
-    rows += f"""
-    <tr>
-        <td>{worker.get("name", "")}</td>
-        <td>{worker.get("skill", "")}</td>
-        <td>{worker.get("phone", "")}</td>
-        <td>{worker.get("location", "")}</td>
-        <td>{worker.get("experience", "")}</td>
-        <td>
-            <form method="POST" action="/admin/delete"
-                  onsubmit="return confirm('Are you sure you want to delete this worker?');">
-                <input type="hidden" name="worker_id" value="{worker.get("id", "")}">
-                <button type="submit">
-                    Delete
-                </button>
-            </form>
-        </td>
-    </tr>
-    """
+        for worker in workers:
+            rows += f"""
+            <tr>
+                <td>{worker.get("name", "")}</td>
+                <td>{worker.get("skill", "")}</td>
+                <td>{worker.get("phone", "")}</td>
+                <td>{worker.get("location", "")}</td>
+                <td>{worker.get("experience", "")}</td>
+                <td>
+                    <form method="POST" action="/admin/delete"
+                          onsubmit="return confirm('Are you sure you want to delete this worker?');">
+                        <input type="hidden" name="worker_id" value="{worker.get("id", "")}">
+                        <button type="submit">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            """
 
             return f"""
             <!DOCTYPE html>
