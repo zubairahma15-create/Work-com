@@ -15,7 +15,86 @@ supabase = create_client(
 # =========================================================
 # ADMIN LOGIN
 # =========================================================
+@app.route("/admin/delete", methods=["POST"])
+def admin_delete():
 
+    worker_id = request.form.get("worker_id", "")
+    password = request.form.get("password", "")
+
+    if not worker_id:
+        return "Worker ID missing", 400
+
+    if not password:
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Confirm Delete - Work.com</title>
+        </head>
+        <body style="font-family:Arial;text-align:center;padding:40px;">
+
+            <h2>Confirm Worker Deletion</h2>
+
+            <p>Enter your admin password to delete this worker.</p>
+
+            <form method="POST" action="/admin/delete">
+
+                <input
+                    type="hidden"
+                    name="worker_id"
+                    value="{worker_id}"
+                >
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Admin Password"
+                    required
+                    style="padding:12px;width:90%;max-width:350px;"
+                >
+
+                <br><br>
+
+                <button
+                    type="submit"
+                    style="padding:12px 25px;background:#d32f2f;color:white;border:none;border-radius:6px;"
+                >
+                    Confirm Delete
+                </button>
+
+            </form>
+
+            <br>
+
+            <a href="/admin">Cancel</a>
+
+        </body>
+        </html>
+        """
+
+    if password != os.environ.get("ADMIN_PASSWORD"):
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
+            Incorrect admin password
+        </h2>
+        <p style="text-align:center;">
+            <a href="/admin">Return to Admin Dashboard</a>
+        </p>
+        """, 401
+
+    try:
+        supabase.table("workers").delete().eq(
+            "id", worker_id
+        ).execute()
+
+        return redirect("/admin")
+
+    except Exception as e:
+        return f"""
+        <h2>Delete Error</h2>
+        <p>{str(e)}</p>
+        """, 500
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
@@ -47,15 +126,24 @@ def admin():
             rows = ""
 
             for worker in workers:
-                rows += f"""
-                <tr>
-                    <td>{worker.get("name", "")}</td>
-                    <td>{worker.get("skill", "")}</td>
-                    <td>{worker.get("phone", "")}</td>
-                    <td>{worker.get("location", "")}</td>
-                    <td>{worker.get("experience", "")}</td>
-                </tr>
-                """
+    rows += f"""
+    <tr>
+        <td>{worker.get("name", "")}</td>
+        <td>{worker.get("skill", "")}</td>
+        <td>{worker.get("phone", "")}</td>
+        <td>{worker.get("location", "")}</td>
+        <td>{worker.get("experience", "")}</td>
+        <td>
+            <form method="POST" action="/admin/delete"
+                  onsubmit="return confirm('Are you sure you want to delete this worker?');">
+                <input type="hidden" name="worker_id" value="{worker.get("id", "")}">
+                <button type="submit">
+                    Delete
+                </button>
+            </form>
+        </td>
+    </tr>
+    """
 
             return f"""
             <!DOCTYPE html>
@@ -122,6 +210,7 @@ def admin():
                         <th>Phone</th>
                         <th>Location</th>
                         <th>Experience</th>
+                        <th>Action</th>
                     </tr>
 
                     {rows}
