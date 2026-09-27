@@ -1,4 +1,4 @@
-jifrom flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for
 from supabase import create_client
 from html import escape
 import os
