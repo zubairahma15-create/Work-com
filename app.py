@@ -13,82 +13,513 @@ supabase = create_client(
     SUPABASE_KEY
 )
 
+ methods=["POST"])
+# =========================================================
+# ADMIN SYSTEM
+# =========================================================
+
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+
 # =========================================================
 # ADMIN LOGIN
+# =========================================================
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+
+    if request.method == "POST":
+
+        password = request.form.get("password", "")
+
+        if password == ADMIN_PASSWORD and ADMIN_PASSWORD:
+
+            session["admin_logged_in"] = True
+
+            return redirect("/admin")
+
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Login Failed - Work.com</title>
+        </head>
+
+        <body style="
+            font-family:Arial;
+            text-align:center;
+            padding:50px;
+            background:#f5f7fb;
+        ">
+
+            <div style="
+                max-width:400px;
+                margin:auto;
+                background:white;
+                padding:30px;
+                border-radius:15px;
+                box-shadow:0 5px 20px rgba(0,0,0,.08);
+            ">
+
+                <h2 style="color:#dc2626;">
+                    Incorrect Password
+                </h2>
+
+                <p>
+                    Please enter the correct admin password.
+                </p>
+
+                <a href="/admin/login">
+                    Try Again
+                </a>
+
+            </div>
+
+        </body>
+        </html>
+        """, 401
+
+
+    return """
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
+        <title>Admin Login - Work.com</title>
+
+        <style>
+
+            body {
+                font-family:Arial;
+                background:#f5f7fb;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                min-height:100vh;
+                margin:0;
+            }
+
+            .box {
+                background:white;
+                padding:30px;
+                border-radius:18px;
+                width:90%;
+                max-width:400px;
+                box-shadow:0 5px 20px rgba(16,24,40,.1);
+            }
+
+            h1 {
+                text-align:center;
+                color:#1769e0;
+            }
+
+            h2 {
+                text-align:center;
+            }
+
+            input {
+                width:100%;
+                padding:14px;
+                margin:15px 0;
+                box-sizing:border-box;
+                border:1px solid #d0d5dd;
+                border-radius:8px;
+                font-size:16px;
+            }
+
+            button {
+                width:100%;
+                padding:14px;
+                background:#1769e0;
+                color:white;
+                border:none;
+                border-radius:8px;
+                font-size:16px;
+                font-weight:bold;
+            }
+
+            .home {
+                display:block;
+                text-align:center;
+                margin-top:20px;
+                color:#1769e0;
+                text-decoration:none;
+            }
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="box">
+
+            <h1>Work.com</h1>
+
+            <h2>Admin Login</h2>
+
+            <form method="POST">
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Admin Password"
+                    required
+                >
+
+                <button type="submit">
+                    Login
+                </button>
+
+            </form>
+
+            <a class="home" href="/">
+                ← Back to Work.com
+            </a>
+
+        </div>
+
+    </body>
+
+    </html>
+    """
+
+
+# =========================================================
+# ADMIN DASHBOARD
+# =========================================================
+
+@app.route("/admin")
+def admin():
+
+    if not session.get("admin_logged_in"):
+
+        return redirect("/admin/login")
+
+
+    try:
+
+        result = (
+            supabase
+            .table("workers")
+            .select("*")
+            .order("created_at", desc=True)
+            .execute()
+        )
+
+        workers = result.data or []
+
+    except Exception as e:
+
+        return f"""
+        <h2 style="font-family:Arial;text-align:center;">
+            Admin Dashboard Error
+        </h2>
+
+        <p style="font-family:Arial;text-align:center;">
+            {escape(str(e))}
+        </p>
+
+        <p style="text-align:center;">
+            <a href="/admin">Try Again</a>
+        </p>
+        """, 500
+
+
+    rows = ""
+
+    for worker in workers:
+
+        worker_id = escape(str(worker.get("id") or ""))
+        name = escape(str(worker.get("name") or ""))
+        skill = escape(str(worker.get("skill") or ""))
+        phone = escape(str(worker.get("phone") or ""))
+        location = escape(str(worker.get("location") or ""))
+        experience = escape(str(worker.get("experience") or ""))
+
+        rows += f"""
+        <tr>
+
+            <td>{name}</td>
+
+            <td>{skill}</td>
+
+            <td>{phone}</td>
+
+            <td>{location}</td>
+
+            <td>{experience}</td>
+
+            <td>
+
+                <a href="/admin/edit/{worker_id}"
+                   style="
+                   display:inline-block;
+                   padding:8px 12px;
+                   background:#2563eb;
+                   color:white;
+                   text-decoration:none;
+                   border-radius:6px;
+                   margin-right:5px;
+                   ">
+                    Edit
+                </a>
+
+                <form method="POST"
+                      action="/admin/delete"
+                      style="display:inline;">
+
+                    <input
+                        type="hidden"
+                        name="worker_id"
+                        value="{worker_id}"
+                    >
+
+                    <button
+                        type="submit"
+                        style="
+                        padding:8px 12px;
+                        background:#dc2626;
+                        color:white;
+                        border:none;
+                        border-radius:6px;
+                        "
+                    >
+                        Delete
+                    </button>
+
+                </form>
+
+            </td>
+
+        </tr>
+        """
+
+
+    return f"""
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
+        <title>Work.com Admin</title>
+
+        <style>
+
+            body {{
+                font-family:Arial;
+                margin:0;
+                padding:20px;
+                background:#f5f7fb;
+            }}
+
+            .header {{
+                background:white;
+                padding:20px;
+                border-radius:15px;
+                margin-bottom:20px;
+            }}
+
+            h1 {{
+                color:#1769e0;
+                margin-top:0;
+            }}
+
+            .topbar {{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:10px;
+                flex-wrap:wrap;
+            }}
+
+            .logout {{
+                background:#667085;
+                color:white;
+                padding:10px 15px;
+                border-radius:8px;
+                text-decoration:none;
+            }}
+
+            .count {{
+                background:white;
+                padding:18px;
+                border-radius:12px;
+                margin-bottom:20px;
+                font-size:18px;
+            }}
+
+            .search {{
+                width:100%;
+                padding:14px;
+                box-sizing:border-box;
+                margin-bottom:20px;
+                border:1px solid #d0d5dd;
+                border-radius:9px;
+                font-size:16px;
+            }}
+
+            .table-wrap {{
+                overflow-x:auto;
+                background:white;
+                border-radius:12px;
+            }}
+
+            table {{
+                width:100%;
+                min-width:850px;
+                border-collapse:collapse;
+            }}
+
+            th, td {{
+                padding:13px;
+                border-bottom:1px solid #e5e7eb;
+                text-align:left;
+            }}
+
+            th {{
+                background:#1769e0;
+                color:white;
+            }}
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <div class="header">
+
+            <div class="topbar">
+
+                <h1>Work.com Admin</h1>
+
+                <a class="logout"
+                   href="/admin/logout">
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <input
+            class="search"
+            id="workerSearch"
+            type="text"
+            oninput="filterWorkers()"
+            placeholder="Search by name, skill or location..."
+        >
+
+
+        <div class="count">
+
+            <strong>Total Registered Workers:</strong>
+            {len(workers)}
+
+        </div>
+
+
+        <div class="table-wrap">
+
+            <table id="workerTable">
+
+                <tr>
+                    <th>Name</th>
+                    <th>Skill</th>
+                    <th>Phone</th>
+                    <th>Location</th>
+                    <th>Experience</th>
+                    <th>Action</th>
+                </tr>
+
+                {rows}
+
+            </table>
+
+        </div>
+
+
+        <script>
+
+        function filterWorkers() {{
+
+            const search =
+                document
+                .getElementById("workerSearch")
+                .value
+                .toLowerCase();
+
+            const rows =
+                document.querySelectorAll(
+                    "#workerTable tr"
+                );
+
+            for (let i = 1; i < rows.length; i++) {{
+
+                const text =
+                    rows[i].innerText.toLowerCase();
+
+                rows[i].style.display =
+                    text.includes(search) ? "" : "none";
+
+            }}
+
+        }}
+
+        </script>
+
+    </body>
+
+    </html>
+    """
+
+
+# =========================================================
+# ADMIN LOGOUT
+# =========================================================
+
+@app.route("/admin/logout")
+def admin_logout():
+
+    session.pop("admin_logged_in", None)
+
+    return redirect("/admin/login")
+
+
+# =========================================================
+# ADMIN DELETE
 # =========================================================
 
 @app.route("/admin/delete", methods=["POST"])
 def admin_delete():
 
+    if not session.get("admin_logged_in"):
+
+        return redirect("/admin/login")
+
+
     worker_id = request.form.get("worker_id", "")
-    password = request.form.get("password", "")
 
     if not worker_id:
+
         return "Worker ID missing", 400
 
-    if not password:
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Confirm Delete - Work.com</title>
-        </head>
-
-        <body style="font-family:Arial;text-align:center;padding:40px;">
-
-            <h2>Confirm Worker Deletion</h2>
-
-            <p>Enter your admin password to delete this worker.</p>
-
-            <form method="POST" action="/admin/delete">
-
-                <input type="hidden"
-                       name="worker_id"
-                       value="{escape(worker_id)}">
-
-                <input type="password"
-                       name="password"
-                       placeholder="Admin Password"
-                       required
-                       style="padding:12px;width:90%;max-width:350px;">
-
-                <br><br>
-
-                <button type="submit"
-                        style="padding:12px 25px;
-                               background:#d32f2f;
-                               color:white;
-                               border:none;
-                               border-radius:6px;">
-                    Confirm Delete
-                </button>
-
-            </form>
-
-            <br>
-
-            <a href="/admin">Cancel</a>
-
-        </body>
-        </html>
-        """
-
-    if password != os.environ.get("ADMIN_PASSWORD"):
-        return """
-        <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
-            Incorrect admin password
-        </h2>
-
-        <p style="text-align:center;">
-            <a href="/admin">Return to Admin Dashboard</a>
-        </p>
-        """, 401
 
     try:
 
         supabase.table("workers").delete().eq(
-            "id", worker_id
+            "id",
+            worker_id
         ).execute()
 
         return redirect("/admin")
@@ -97,104 +528,28 @@ def admin_delete():
 
         return f"""
         <h2>Delete Error</h2>
+
         <p>{escape(str(e))}</p>
-        <p><a href="/admin">Back to Admin</a></p>
+
+        <p>
+            <a href="/admin">
+                Back to Admin
+            </a>
+        </p>
         """, 500
 
 
 # =========================================================
-# ADMIN EDIT WORKER
+# ADMIN EDIT
 # =========================================================
 
 @app.route("/admin/edit/<worker_id>", methods=["GET", "POST"])
 def admin_edit(worker_id):
 
-    if request.method == "GET":
-        return f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport"
-                  content="width=device-width, initial-scale=1.0">
+    if not session.get("admin_logged_in"):
 
-            <title>Edit Worker - Work.com</title>
-        </head>
+        return redirect("/admin/login")
 
-        <body style="
-            font-family:Arial;
-            background:#f5f7fa;
-            padding:30px;
-        ">
-
-        <div style="
-            max-width:400px;
-            margin:50px auto;
-            background:white;
-            padding:30px;
-            border-radius:15px;
-            box-shadow:0 5px 20px rgba(0,0,0,.08);
-        ">
-
-            <h2 style="text-align:center;color:#1565c0;">
-                Admin Verification
-            </h2>
-
-            <p style="text-align:center;color:#667085;">
-                Enter your admin password to edit this worker.
-            </p>
-
-            <form method="POST">
-
-                <input type="password"
-                       name="password"
-                       placeholder="Admin Password"
-                       required
-                       style="
-                       width:100%;
-                       padding:14px;
-                       box-sizing:border-box;
-                       margin:15px 0;
-                       border:1px solid #ddd;
-                       border-radius:8px;
-                       ">
-
-                <button type="submit"
-                        style="
-                        width:100%;
-                        padding:14px;
-                        background:#1565c0;
-                        color:white;
-                        border:none;
-                        border-radius:8px;
-                        font-size:16px;
-                        ">
-                    Continue
-                </button>
-
-            </form>
-
-            <p style="text-align:center;margin-top:20px;">
-                <a href="/admin">Cancel</a>
-            </p>
-
-        </div>
-
-        </body>
-        </html>
-        """
-
-    password = request.form.get("password", "")
-
-    if password != os.environ.get("ADMIN_PASSWORD"):
-        return """
-        <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
-            Incorrect admin password
-        </h2>
-
-        <p style="text-align:center;">
-            <a href="/admin">Return to Admin Dashboard</a>
-        </p>
-        """, 401
 
     try:
 
@@ -209,6 +564,7 @@ def admin_edit(worker_id):
         workers_found = result.data or []
 
         if not workers_found:
+
             return "Worker not found", 404
 
         worker = workers_found[0]
@@ -217,15 +573,18 @@ def admin_edit(worker_id):
 
         return f"""
         <h2>Unable to load worker</h2>
+
         <p>{escape(str(e))}</p>
-        <p><a href="/admin">Back to Admin</a></p>
+
+        <p>
+            <a href="/admin">
+                Back to Admin
+            </a>
+        </p>
         """, 500
 
-    if request.args.get("save") == "1":
 
-        return redirect("/admin")
-
-    if request.method == "POST" and request.form.get("save_changes") == "1":
+    if request.method == "POST":
 
         name = request.form.get("name", "").strip()
         skill = request.form.get("skill", "").strip()
@@ -234,35 +593,50 @@ def admin_edit(worker_id):
         experience = request.form.get("experience", "").strip()
         description = request.form.get("description", "").strip()
 
+
         if not name or not skill or not phone or not location:
+
             return """
-            <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
+            <h2 style="font-family:Arial;text-align:center;">
                 Please fill all required fields.
             </h2>
 
             <p style="text-align:center;">
-                <a href="/admin">Back to Admin</a>
+                <a href="/admin">
+                    Back to Admin
+                </a>
             </p>
             """, 400
+
 
         try:
 
             supabase.table("workers").update({
+
                 "name": name,
                 "skill": skill,
                 "phone": phone,
                 "location": location,
                 "experience": experience,
                 "description": description
-            }).eq("id", worker_id).execute()
+
+            }).eq(
+                "id",
+                worker_id
+            ).execute()
+
 
             return """
             <!DOCTYPE html>
             <html>
+
             <head>
+
                 <meta name="viewport"
                       content="width=device-width, initial-scale=1.0">
+
                 <title>Updated - Work.com</title>
+
             </head>
 
             <body style="
@@ -271,7 +645,9 @@ def admin_edit(worker_id):
                 margin-top:60px;
             ">
 
-                <h2>Worker updated successfully! ✅</h2>
+                <h2>
+                    Worker updated successfully! ✅
+                </h2>
 
                 <p>
                     The worker information has been saved.
@@ -282,6 +658,7 @@ def admin_edit(worker_id):
                 </a>
 
             </body>
+
             </html>
             """
 
@@ -289,9 +666,16 @@ def admin_edit(worker_id):
 
             return f"""
             <h2>Update Error</h2>
+
             <p>{escape(str(e))}</p>
-            <p><a href="/admin">Back to Admin</a></p>
+
+            <p>
+                <a href="/admin">
+                    Back to Admin
+                </a>
+            </p>
             """, 500
+
 
     return f"""
     <!DOCTYPE html>
@@ -308,9 +692,9 @@ def admin_edit(worker_id):
 
             body {{
                 font-family:Arial;
-                background:#f5f7fa;
-                margin:0;
+                background:#f5f7fb;
                 padding:20px;
+                margin:0;
             }}
 
             .box {{
@@ -319,11 +703,11 @@ def admin_edit(worker_id):
                 background:white;
                 padding:25px;
                 border-radius:15px;
-                box-shadow:0 5px 20px rgba(0,0,0,.08);
+                box-shadow:0 5px 20px rgba(16,24,40,.08);
             }}
 
             h1 {{
-                color:#1565c0;
+                color:#1769e0;
             }}
 
             label {{
@@ -333,11 +717,12 @@ def admin_edit(worker_id):
                 margin-bottom:6px;
             }}
 
-            input, textarea {{
+            input,
+            textarea {{
                 width:100%;
                 padding:13px;
                 box-sizing:border-box;
-                border:1px solid #ddd;
+                border:1px solid #d0d5dd;
                 border-radius:8px;
                 font-size:16px;
             }}
@@ -350,7 +735,7 @@ def admin_edit(worker_id):
                 width:100%;
                 padding:14px;
                 margin-top:22px;
-                background:#1565c0;
+                background:#1769e0;
                 color:white;
                 border:none;
                 border-radius:8px;
@@ -370,388 +755,78 @@ def admin_edit(worker_id):
 
     <body>
 
-    <div class="box">
-
-        <h1>Edit Worker</h1>
-
-        <form method="POST">
-
-            <input type="hidden"
-                   name="password"
-                   value="{escape(password)}">
-
-            <input type="hidden"
-                   name="save_changes"
-                   value="1">
-
-            <label>Name</label>
-
-            <input type="text"
-                   name="name"
-                   value="{escape(worker.get("name") or "")}"
-                   required>
-
-            <label>Skill / Profession</label>
-
-            <input type="text"
-                   name="skill"
-                   value="{escape(worker.get("skill") or "")}"
-                   required>
-
-            <label>Phone</label>
-
-            <input type="text"
-                   name="phone"
-                   value="{escape(worker.get("phone") or "")}"
-                   required>
-
-            <label>Location</label>
-
-            <input type="text"
-                   name="location"
-                   value="{escape(worker.get("location") or "")}"
-                   required>
-
-            <label>Experience</label>
-
-            <input type="text"
-                   name="experience"
-                   value="{escape(worker.get("experience") or "")}">
-
-            <label>About Work</label>
-
-            <textarea name="description">{escape(worker.get("description") or "")}</textarea>
-
-            <button type="submit">
-                Save Changes
-            </button>
-
-        </form>
-
-        <a class="back" href="/admin">
-            ← Back to Admin
-        </a>
-
-    </div>
-
-    </body>
-    </html>
-    """
-
-
-# =========================================================
-# ADMIN DASHBOARD
-# =========================================================
-
-@app.route("/admin", methods=["GET", "POST"])
-def admin():
-
-    if request.method == "POST":
-
-        password = request.form.get("password", "")
-
-        if password != os.environ.get("ADMIN_PASSWORD"):
-            return """
-            <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
-                Incorrect password
-            </h2>
-
-            <p style="text-align:center;font-family:Arial;">
-                <a href="/admin">Try again</a>
-            </p>
-            """, 401
-
-        try:
-
-            result = (
-                supabase
-                .table("workers")
-                .select("*")
-                .order("created_at", desc=True)
-                .execute()
-            )
-
-            workers = result.data or []
-
-            rows = ""
-
-            for worker in workers:
-
-                worker_id = escape(str(worker.get("id") or ""))
-                name = escape(str(worker.get("name") or ""))
-                skill = escape(str(worker.get("skill") or ""))
-                phone = escape(str(worker.get("phone") or ""))
-                location = escape(str(worker.get("location") or ""))
-                experience = escape(str(worker.get("experience") or ""))
-
-                rows += f"""
-                <tr>
-
-                    <td>{name}</td>
-                    <td>{skill}</td>
-                    <td>{phone}</td>
-                    <td>{location}</td>
-                    <td>{experience}</td>
-
-                    <td>
-
-                        <a href="/admin/edit/{worker_id}"
-                           style="
-                           display:inline-block;
-                           padding:8px 12px;
-                           background:#2563eb;
-                           color:white;
-                           text-decoration:none;
-                           border-radius:6px;
-                           margin-right:5px;
-                           ">
-                            Edit
-                        </a>
-
-                        <form method="POST"
-                              action="/admin/delete"
-                              style="display:inline;">
-
-                            <input type="hidden"
-                                   name="worker_id"
-                                   value="{worker_id}">
-
-                            <button type="submit"
-                                    style="
-                                    padding:8px 12px;
-                                    background:#dc2626;
-                                    color:white;
-                                    border:none;
-                                    border-radius:6px;
-                                    ">
-                                Delete
-                            </button>
-
-                        </form>
-
-                    </td>
-
-                </tr>
-                """
-
-            return f"""
-            <!DOCTYPE html>
-            <html>
-
-            <head>
-
-                <meta name="viewport"
-                      content="width=device-width, initial-scale=1.0">
-
-                <title>Work.com Admin</title>
-
-                <style>
-
-                    body {{
-                        font-family:Arial;
-                        margin:20px;
-                        background:#f5f7fa;
-                    }}
-
-                    h1 {{
-                        color:#1565c0;
-                    }}
-
-                    .count {{
-                        background:white;
-                        padding:15px;
-                        border-radius:10px;
-                        margin-bottom:20px;
-                    }}
-
-                    .search {{
-                        width:100%;
-                        padding:14px;
-                        box-sizing:border-box;
-                        margin-bottom:15px;
-                        border:1px solid #ddd;
-                        border-radius:8px;
-                    }}
-
-                    .table-wrap {{
-                        overflow-x:auto;
-                    }}
-
-                    table {{
-                        width:100%;
-                        min-width:800px;
-                        border-collapse:collapse;
-                        background:white;
-                    }}
-
-                    th, td {{
-                        padding:12px;
-                        border-bottom:1px solid #ddd;
-                        text-align:left;
-                    }}
-
-                    th {{
-                        background:#1565c0;
-                        color:white;
-                    }}
-
-                </style>
-
-            </head>
-
-            <body>
-
-                <h1>Work.com Admin Dashboard</h1>
-
-                <input
-                    class="search"
-                    type="text"
-                    id="workerSearch"
-                    oninput="filterWorkers()"
-                    placeholder="Search by name, skill or location..."
-                >
-
-                <div class="count">
-
-                    <strong>Total Registered Workers:</strong>
-                    {len(workers)}
-
-                </div>
-
-                <div class="table-wrap">
-
-                    <table id="workerTable">
-
-                        <tr>
-                            <th>Name</th>
-                            <th>Skill</th>
-                            <th>Phone</th>
-                            <th>Location</th>
-                            <th>Experience</th>
-                            <th>Action</th>
-                        </tr>
-
-                        {rows}
-
-                    </table>
-
-                </div>
-
-                <script>
-
-                function filterWorkers() {{
-
-                    const search =
-                        document.getElementById("workerSearch")
-                        .value
-                        .toLowerCase();
-
-                    const rows =
-                        document.querySelectorAll("#workerTable tr");
-
-                    for (let i = 1; i < rows.length; i++) {{
-
-                        const text =
-                            rows[i].innerText.toLowerCase();
-
-                        rows[i].style.display =
-                            text.includes(search) ? "" : "none";
-
-                    }}
-
-                }}
-
-                </script>
-
-            </body>
-
-            </html>
-            """
-
-        except Exception as e:
-
-            return f"""
-            <h2>Admin Dashboard Error</h2>
-            <p>{escape(str(e))}</p>
-            """, 500
-
-    return """
-    <!DOCTYPE html>
-    <html>
-
-    <head>
-
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1.0">
-
-        <title>Work.com Admin Login</title>
-
-        <style>
-
-            body {
-                font-family:Arial;
-                background:#f5f7fa;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                min-height:100vh;
-            }
-
-            .box {
-                background:white;
-                padding:30px;
-                border-radius:15px;
-                width:90%;
-                max-width:400px;
-                box-shadow:0 5px 20px rgba(0,0,0,.1);
-            }
-
-            h1 {
-                color:#1565c0;
-                text-align:center;
-            }
-
-            input {
-                width:100%;
-                padding:14px;
-                margin:15px 0;
-                box-sizing:border-box;
-            }
-
-            button {
-                width:100%;
-                padding:14px;
-                background:#1565c0;
-                color:white;
-                border:none;
-                border-radius:8px;
-                font-size:16px;
-            }
-
-        </style>
-
-    </head>
-
-    <body>
-
         <div class="box">
 
-            <h1>Work.com Admin</h1>
+            <h1>Edit Worker</h1>
 
             <form method="POST">
 
+                <label>Name</label>
+
                 <input
-                    type="password"
-                    name="password"
-                    placeholder="Admin Password"
+                    type="text"
+                    name="name"
+                    value="{escape(worker.get("name") or "")}"
                     required
                 >
 
+
+                <label>Skill / Profession</label>
+
+                <input
+                    type="text"
+                    name="skill"
+                    value="{escape(worker.get("skill") or "")}"
+                    required
+                >
+
+
+                <label>Phone</label>
+
+                <input
+                    type="text"
+                    name="phone"
+                    value="{escape(worker.get("phone") or "")}"
+                    required
+                >
+
+
+                <label>Location</label>
+
+                <input
+                    type="text"
+                    name="location"
+                    value="{escape(worker.get("location") or "")}"
+                    required
+                >
+
+
+                <label>Experience</label>
+
+                <input
+                    type="text"
+                    name="experience"
+                    value="{escape(worker.get("experience") or "")}"
+                >
+
+
+                <label>About Work</label>
+
+                <textarea
+                    name="description"
+                >{escape(worker.get("description") or "")}</textarea>
+
+
                 <button type="submit">
-                    Login
+                    Save Changes
                 </button>
 
             </form>
+
+
+            <a class="back" href="/admin">
+                ← Back to Admin
+            </a>
 
         </div>
 
@@ -759,6 +834,7 @@ def admin():
 
     </html>
     """
+                
 
 # =========================================================
 # HOME PAGE
