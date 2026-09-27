@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for
+jifrom flask import Flask, request, redirect, url_for
 from supabase import create_client
 from html import escape
 import os
@@ -1917,9 +1917,8 @@ def search():
         "")
 
         initial = escape(
-            (worker.get("name") or "?")[:1].upper()
-        )href(worker.get("name") or "?")[:1].upper()
-        )href="https://wa.me/{phone}""https://wa.me/{phone}"
+    (worker.get("name") or "?")[:1].upper()
+)
 
         cards += f"""
         <div class="worker-card">
