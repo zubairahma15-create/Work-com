@@ -1419,7 +1419,6 @@ footer strong {
 </html>
 """
 
-
 # =========================================================
 # WORKER REGISTRATION
 # =========================================================
@@ -1440,6 +1439,9 @@ def register():
         experience = request.form.get("experience", "").strip()
         description = request.form.get("description", "").strip()
 
+        # Work photos
+        photos = request.files.getlist("photos")
+
         if not name or not skill or not phone or not location:
             return """
             <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
@@ -1451,9 +1453,47 @@ def register():
             </p>
             """, 400
 
+        # Allow maximum 5 photos
+        photos = [photo for photo in photos if photo and photo.filename]
+
+        if len(photos) > 5:
+            return """
+            <div style="
+                font-family:Arial;
+                max-width:600px;
+                margin:60px auto;
+                padding:30px;
+                text-align:center;
+            ">
+                <h2>Maximum 5 photos allowed.</h2>
+
+                <p style="color:#667085;">
+                    Please go back and select up to 5 work photos.
+                </p>
+
+                <a href="/register"
+                   style="
+                   display:inline-block;
+                   margin-top:20px;
+                   background:#1769e0;
+                   color:white;
+                   padding:12px 20px;
+                   border-radius:8px;
+                   text-decoration:none;
+                   font-weight:bold;
+                   ">
+                    ← Back to Registration
+                </a>
+            </div>
+            """, 400
+
         try:
 
-            supabase.table("workers").insert({
+            # -------------------------
+            # CREATE WORKER
+            # -------------------------
+
+            worker_result = supabase.table("workers").insert({
                 "name": name,
                 "skill": skill,
                 "phone": phone,
@@ -1461,6 +1501,64 @@ def register():
                 "experience": experience,
                 "description": description
             }).execute()
+
+            if not worker_result.data:
+                raise Exception("Worker was not created.")
+
+            worker_id = str(worker_result.data[0]["id"])
+
+            # -------------------------
+            # UPLOAD WORK PHOTOS
+            # -------------------------
+
+            import uuid
+
+            allowed_types = {
+                "image/jpeg": ".jpg",
+                "image/png": ".png",
+                "image/webp": ".webp"
+            }
+
+            for photo in photos:
+
+                content_type = photo.content_type or ""
+
+                if content_type not in allowed_types:
+                    continue
+
+                extension = allowed_types[content_type]
+
+                filename = (
+                    str(worker_id)
+                    + "/"
+                    + str(uuid.uuid4())
+                    + extension
+                )
+
+                photo_data = photo.read()
+
+                # Maximum 5 MB per photo
+                if len(photo_data) > 5 * 1024 * 1024:
+                    continue
+
+                supabase.storage.from_("worker-photos").upload(
+                    filename,
+                    photo_data,
+                    file_options={
+                        "content-type": content_type,
+                        "upsert": "false"
+                    }
+                )
+
+                public_url = supabase.storage.from_(
+                    "worker-photos"
+                ).get_public_url(filename)
+
+                # Save photo information
+                supabase.table("worker_photos").insert({
+                    "worker_id": worker_id,
+                    "photo_url": public_url
+                }).execute()
 
             # Important:
             # Redirect after successful POST.
@@ -1628,6 +1726,29 @@ textarea {
     margin-top: 6px;
 }
 
+.photo-box {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.photo-box input {
+    background: white;
+}
+
+.photo-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.photo-info {
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
 .register-btn {
     width: 100%;
     border: none;
@@ -1705,7 +1826,10 @@ textarea {
 
     <div class="form-card">
 
-        <form method="POST" action="/register">
+        <form
+            method="POST"
+            action="/register"
+            enctype="multipart/form-data">
 
             <div class="form-group">
 
@@ -1810,6 +1934,35 @@ textarea {
             </div>
 
 
+            <div class="form-group">
+
+                <label>
+                    📷 Photos of Your Work
+                </label>
+
+                <div class="photo-box">
+
+                    <div class="photo-title">
+                        Show customers your previous work
+                    </div>
+
+                    <div class="photo-info">
+                        Upload up to 5 photos. JPG, PNG or WebP.
+                        Maximum 5 MB per photo.
+                    </div>
+
+                    <input
+                        type="file"
+                        name="photos"
+                        accept="image/*"
+                        multiple
+                    >
+
+                </div>
+
+            </div>
+
+
             <button
                 class="register-btn"
                 type="submit">
@@ -1827,8 +1980,7 @@ textarea {
 </body>
 
 </html>
-"""
-
+"""     
 
 # =========================================================
 # REGISTRATION SUCCESS
