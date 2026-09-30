@@ -2474,7 +2474,6 @@ header {{
 </html>
 """
 
-
 # =========================================================
 # ALL WORKERS
 # =========================================================
@@ -2492,7 +2491,7 @@ def workers():
             .execute()
         )
 
-        worker_list = result.data
+        worker_list = result.data or []
 
     except Exception as e:
 
@@ -2509,9 +2508,42 @@ def workers():
         """
 
 
+    # Load worker photos
+    photo_map = {}
+
+    try:
+
+        photo_result = (
+            supabase
+            .table("worker_photos")
+            .select("worker_id, photo_url")
+            .order("created_at", desc=False)
+            .execute()
+        )
+
+        for photo in (photo_result.data or []):
+
+            worker_id = str(photo.get("worker_id") or "")
+            photo_url = photo.get("photo_url")
+
+            if worker_id and photo_url:
+
+                photo_map.setdefault(
+                    worker_id,
+                    []
+                ).append(photo_url)
+
+    except Exception as e:
+
+        print("Worker photos error:", e)
+
+
     cards = ""
 
+
     for worker in worker_list:
+
+        worker_id = str(worker.get("id") or "")
 
         name = escape(worker.get("name") or "")
         skill = escape(worker.get("skill") or "")
@@ -2523,6 +2555,43 @@ def workers():
         initial = escape(
             (worker.get("name") or "?")[:1].upper()
         )
+
+
+        # Get photos for this worker
+        worker_photo_list = photo_map.get(
+            worker_id,
+            []
+        )
+
+
+        photos_html = ""
+
+        if worker_photo_list:
+
+            photos_html = """
+            <div class="worker-photos">
+            """
+
+            for photo_url in worker_photo_list[:5]:
+
+                safe_photo_url = escape(
+                    str(photo_url),
+                    quote=True
+                )
+
+                photos_html += f"""
+                <img
+                    class="worker-photo"
+                    src="{safe_photo_url}"
+                    alt="Work photo of {name}"
+                    loading="lazy"
+                >
+                """
+
+            photos_html += """
+            </div>
+            """
+
 
         cards += f"""
         <div class="worker-card">
@@ -2546,6 +2615,9 @@ def workers():
             </div>
 
 
+            {photos_html}
+
+
             <div class="worker-info">
 
                 <div class="info-item">
@@ -2566,9 +2638,11 @@ def workers():
 
                     <div>
                         <small>Experience</small>
+
                         <strong>
                             {experience or "Not specified"}
                         </strong>
+
                     </div>
 
                 </div>
@@ -2577,15 +2651,17 @@ def workers():
 
 
             <div class="description">
+
                 {description or "Skilled professional available for work."}
+
             </div>
 
 
-            <a class="contact-btn"
-               href="tel:{phone}">
-
+            <a
+                class="contact-btn"
+                href="tel:{phone}"
+            >
                 📞 Contact Worker
-
             </a>
 
         </div>
@@ -2613,14 +2689,20 @@ def workers():
 
     return f"""
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>Work.com - Skilled Workers</title>
+
 
 <style>
 
@@ -2630,20 +2712,24 @@ def workers():
     padding: 0;
 }}
 
+
 body {{
     font-family: Arial, sans-serif;
     background: #f5f7fb;
     color: #172033;
 }}
 
+
 header {{
     background: white;
     padding: 18px 7%;
     border-bottom: 1px solid #e6eaf0;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
 }}
+
 
 .logo {{
     font-size: 25px;
@@ -2651,26 +2737,31 @@ header {{
     color: #1769e0;
 }}
 
+
 .home-btn {{
     text-decoration: none;
     color: #1769e0;
     font-weight: 700;
 }}
 
+
 .hero {{
     text-align: center;
     padding: 45px 20px 30px;
 }}
+
 
 .hero h1 {{
     font-size: 38px;
     margin-bottom: 10px;
 }}
 
+
 .hero p {{
     color: #667085;
     font-size: 17px;
 }}
+
 
 .workers-container {{
     max-width: 1100px;
@@ -2678,125 +2769,209 @@ header {{
     padding: 20px;
 }}
 
+
 .worker-grid {{
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 22px;
 }}
 
+
 .worker-card {{
     background: white;
     border: 1px solid #e5e9f0;
     border-radius: 18px;
     padding: 24px;
-    box-shadow: 0 5px 20px rgba(16,24,40,.06);
+
+    box-shadow:
+        0 5px 20px rgba(16,24,40,.06);
 }}
+
 
 .worker-top {{
     display: flex;
     align-items: center;
     gap: 15px;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
 }}
+
 
 .worker-avatar {{
     width: 58px;
     height: 58px;
     border-radius: 50%;
+
     background: #eaf3ff;
     color: #1769e0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     font-size: 25px;
     font-weight: 800;
+
+    flex-shrink: 0;
 }}
+
 
 .worker-top h2 {{
     font-size: 21px;
     margin-bottom: 7px;
 }}
 
+
 .skill-badge {{
     display: inline-block;
+
     background: #eef6ff;
     color: #1769e0;
+
     padding: 6px 10px;
     border-radius: 20px;
+
     font-size: 13px;
     font-weight: 700;
 }}
 
+
+/* Worker photos */
+
+.worker-photos {{
+    display: flex;
+    gap: 10px;
+
+    overflow-x: auto;
+
+    margin-bottom: 18px;
+    padding-bottom: 5px;
+}}
+
+
+.worker-photo {{
+    width: 135px;
+    height: 135px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+
+    border: 1px solid #e5e9f0;
+
+    flex: 0 0 auto;
+
+    background: #f1f5f9;
+}}
+
+
 .worker-info {{
     display: grid;
     grid-template-columns: 1fr 1fr;
+
     gap: 12px;
+
     margin-bottom: 18px;
 }}
+
 
 .info-item {{
     display: flex;
     gap: 9px;
     align-items: center;
+
     background: #f8fafc;
+
     padding: 11px;
+
     border-radius: 10px;
 }}
+
 
 .info-item span {{
     font-size: 20px;
 }}
 
+
 .info-item small {{
     display: block;
+
     color: #667085;
+
     font-size: 11px;
+
     margin-bottom: 3px;
 }}
+
 
 .info-item strong {{
     font-size: 14px;
 }}
 
+
 .description {{
     color: #667085;
+
     font-size: 14px;
+
     line-height: 1.6;
+
     padding: 12px 0 18px;
 }}
 
+
 .contact-btn {{
     display: block;
+
     text-align: center;
+
     background: #1769e0;
+
     color: white;
+
     padding: 13px;
+
     border-radius: 9px;
+
     text-decoration: none;
+
     font-weight: 700;
 }}
 
+
 .empty-box {{
     background: white;
+
     max-width: 600px;
+
     margin: 30px auto;
+
     padding: 45px 25px;
+
     text-align: center;
+
     border-radius: 18px;
 }}
 
+
 .empty-box p {{
     color: #667085;
+
     margin-top: 8px;
 }}
 
+
 footer {{
     text-align: center;
+
     padding: 30px;
+
     margin-top: 40px;
+
     background: #101828;
+
     color: #cbd5e1;
 }}
+
 
 @media (max-width: 700px) {{
 
@@ -2812,6 +2987,11 @@ footer {{
         grid-template-columns: 1fr;
     }}
 
+    .worker-photo {{
+        width: 115px;
+        height: 115px;
+    }}
+
     header {{
         padding: 16px 5%;
     }}
@@ -2822,7 +3002,9 @@ footer {{
 
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -2830,7 +3012,10 @@ footer {{
         Work.com
     </div>
 
-    <a class="home-btn" href="/">
+    <a
+        class="home-btn"
+        href="/"
+    >
         ← Home
     </a>
 
@@ -2865,10 +3050,12 @@ footer {{
 
 </footer>
 
+
 </body>
 
 </html>
 """
+
 
 
 # =========================================================
