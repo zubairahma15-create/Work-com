@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, url_for, session
 from supabase import create_client
 from html import escape
+import razorpay
 import os
 
 app = Flask(__name__)
@@ -12,7 +13,19 @@ supabase = create_client(
     SUPABASE_URL,
     SUPABASE_KEY
 )
+# =========================================================
+# RAZORPAY
+# =========================================================
 
+RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
+
+razorpay_client = razorpay.Client(
+    auth=(
+        RAZORPAY_KEY_ID,
+        RAZORPAY_KEY_SECRET
+    )
+)
 # =========================================================
 # ADMIN SYSTEM
 # =========================================================
