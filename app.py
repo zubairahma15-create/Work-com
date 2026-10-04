@@ -1432,75 +1432,140 @@ footer strong {
 </html>
 """
 
-# =========================================================
-# WORKER REGISTRATION
-# =========================================================
+# -------------------------
+# UPLOAD WORK PHOTOS
+# -------------------------
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
+import uuid
 
-    # -------------------------
-    # SAVE WORKER
-    # -------------------------
+allowed_types = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp"
+}
 
-    if request.method == "POST":
+for photo in photos:
 
-        name = request.form.get("name", "").strip()
-        skill = request.form.get("skill", "").strip()
-        phone = request.form.get("phone", "").strip()
-        location = request.form.get("location", "").strip()
-        experience = request.form.get("experience", "").strip()
-        description = request.form.get("description", "").strip()
+    if not photo or not photo.filename:
+        continue
 
-        # Work photos
-        photos = request.files.getlist("photos")
+    content_type = photo.content_type or ""
 
-        if not name or not skill or not phone or not location:
-            return """
-            <h2 style="font-family:Arial;text-align:center;margin-top:60px;">
-                Please fill all required fields.
-            </h2>
+    if content_type not in allowed_types:
+        continue
 
-            <p style="text-align:center;font-family:Arial;">
-                <a href="/register">← Back to registration</a>
+    extension = allowed_types[content_type]
+
+    filename = (
+        str(worker_id)
+        + "/"
+        + str(uuid.uuid4())
+        + extension
+    )
+
+    photo_data = photo.read()
+
+    # Maximum 5 MB per photo
+    if len(photo_data) > 5 * 1024 * 1024:
+        continue
+
+    try:
+
+        supabase.storage.from_("worker-photos").upload(
+            filename,
+            photo_data,
+            file_options={
+                "content-type": content_type,
+                "upsert": "false"
+            }
+        )
+
+        public_url = supabase.storage.from_(
+            "worker-photos"
+        ).get_public_url(filename)
+
+        # Save photo information
+        supabase.table("worker_photos").insert({
+            "worker_id": worker_id,
+            "photo_url": public_url
+        }).execute()
+
+    except Exception as photo_error:
+
+        # If a photo fails, registration still continues.
+        print("Photo upload skipped:", photo_error)
+
+
+# Registration completed successfully.
+# Payment is NOT included yet.
+
+return page(
+    "Registration Successful",
+    f"""
+    <div class="card" style="text-align:center">
+
+        <div class="notice">
+            <h2>Registration successful!</h2>
+
+            <p>
+                Your Work.com worker profile has been created.
             </p>
-            """, 400
+        </div>
 
-        # Allow maximum 5 photos
-        photos = [photo for photo in photos if photo and photo.filename]
+        <div class="actions" style="justify-content:center">
 
-        if len(photos) > 5:
-            return """
-            <div style="
-                font-family:Arial;
-                max-width:600px;
-                margin:60px auto;
-                padding:30px;
-                text-align:center;
-            ">
-                <h2>Maximum 5 photos allowed.</h2>
+            <a class="btn"
+               href="/worker/{esc(worker_id)}">
+                View Profile
+            </a>
 
-                <p style="color:#667085;">
-                    Please go back and select up to 5 work photos.
-                </p>
+            <a class="btn secondary"
+               href="/workers">
+                Worker Directory
+            </a>
 
-                <a href="/register"
-                   style="
-                   display:inline-block;
-                   margin-top:20px;
-                   background:#1769e0;
-                   color:white;
-                   padding:12px 20px;
-                   border-radius:8px;
-                   text-decoration:none;
-                   font-weight:bold;
-                   ">
-                    ← Back to Registration
-                </a>
-            </div>
-            """, 400
+        </div>
 
-        try:
+    </div>
+    """
+)
+
+except Exception as e:
+
+    print("Registration error:", e)
+
+    return """
+    <div style="
+        font-family:Arial;
+        max-width:600px;
+        margin:60px auto;
+        padding:30px;
+        text-align:center;
+    ">
+
+        <h2>Registration could not be completed.</h2>
+
+        <p style="color:#667085;">
+            Please try again.
+        </p>
+
+        <a href="/register"
+           style="
+           display:inline-block;
+           margin-top:20px;
+           background:#1769e0;
+           color:white;
+           padding:12px 20px;
+           border-radius:8px;
+           text-decoration:none;
+           font-weight:bold;
+           ">
+            ← Back to Registration
+        </a>
+
+    </div>
+    """, 500
+                
 
             # -------------------------
             # CREATE WORKER
