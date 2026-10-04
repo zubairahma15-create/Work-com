@@ -1432,140 +1432,139 @@ footer strong {
 </html>
 """
 
-# -------------------------
-# UPLOAD WORK PHOTOS
-# -------------------------
+            # -------------------------
+            # UPLOAD WORK PHOTOS
+            # -------------------------
 
-import uuid
+            import uuid
 
-allowed_types = {
-    "image/jpeg": ".jpg",
-    "image/png": ".png",
-    "image/webp": ".webp"
-}
-
-for photo in photos:
-
-    if not photo or not photo.filename:
-        continue
-
-    content_type = photo.content_type or ""
-
-    if content_type not in allowed_types:
-        continue
-
-    extension = allowed_types[content_type]
-
-    filename = (
-        str(worker_id)
-        + "/"
-        + str(uuid.uuid4())
-        + extension
-    )
-
-    photo_data = photo.read()
-
-    # Maximum 5 MB per photo
-    if len(photo_data) > 5 * 1024 * 1024:
-        continue
-
-    try:
-
-        supabase.storage.from_("worker-photos").upload(
-            filename,
-            photo_data,
-            file_options={
-                "content-type": content_type,
-                "upsert": "false"
+            allowed_types = {
+                "image/jpeg": ".jpg",
+                "image/png": ".png",
+                "image/webp": ".webp"
             }
-        )
 
-        public_url = supabase.storage.from_(
-            "worker-photos"
-        ).get_public_url(filename)
+            for photo in photos:
 
-        # Save photo information
-        supabase.table("worker_photos").insert({
-            "worker_id": worker_id,
-            "photo_url": public_url
-        }).execute()
+                if not photo or not photo.filename:
+                    continue
 
-    except Exception as photo_error:
+                content_type = photo.content_type or ""
 
-        # If a photo fails, registration still continues.
-        print("Photo upload skipped:", photo_error)
+                if content_type not in allowed_types:
+                    continue
 
+                extension = allowed_types[content_type]
 
-# Registration completed successfully.
-# Payment is NOT included yet.
+                filename = (
+                    str(worker_id)
+                    + "/"
+                    + str(uuid.uuid4())
+                    + extension
+                )
 
-return page(
-    "Registration Successful",
-    f"""
-    <div class="card" style="text-align:center">
+                photo_data = photo.read()
 
-        <div class="notice">
-            <h2>Registration successful!</h2>
+                # Maximum 5 MB per photo
+                if len(photo_data) > 5 * 1024 * 1024:
+                    continue
 
-            <p>
-                Your Work.com worker profile has been created.
-            </p>
-        </div>
+                try:
 
-        <div class="actions" style="justify-content:center">
+                    supabase.storage.from_("worker-photos").upload(
+                        filename,
+                        photo_data,
+                        file_options={
+                            "content-type": content_type,
+                            "upsert": "false"
+                        }
+                    )
 
-            <a class="btn"
-               href="/worker/{esc(worker_id)}">
-                View Profile
-            </a>
+                    public_url = supabase.storage.from_(
+                        "worker-photos"
+                    ).get_public_url(filename)
 
-            <a class="btn secondary"
-               href="/workers">
-                Worker Directory
-            </a>
+                    supabase.table("worker_photos").insert({
+                        "worker_id": worker_id,
+                        "photo_url": public_url
+                    }).execute()
 
-        </div>
+                except Exception as photo_error:
 
-    </div>
-        """
-        )
+                    print(
+                        "Photo upload skipped:",
+                        photo_error
+                    )
 
-except Exception as e:
+            # Registration completed successfully.
+            # Payment is NOT included yet.
 
-    print("Registration error:", e)
+            return page(
+                "Registration Successful",
+                f"""
+                <div class="card" style="text-align:center">
 
-    return """
-    <div style="
-        font-family:Arial;
-        max-width:600px;
-        margin:60px auto;
-        padding:30px;
-        text-align:center;
-    ">
+                    <div class="notice">
+                        <h2>Registration successful!</h2>
 
-        <h2>Registration could not be completed.</h2>
+                        <p>
+                            Your Work.com worker profile has been created.
+                        </p>
+                    </div>
 
-        <p style="color:#667085;">
-            Please try again.
-        </p>
+                    <div class="actions" style="justify-content:center">
 
-        <a href="/register"
-           style="
-           display:inline-block;
-           margin-top:20px;
-           background:#1769e0;
-           color:white;
-           padding:12px 20px;
-           border-radius:8px;
-           text-decoration:none;
-           font-weight:bold;
-           ">
-            ← Back to Registration
-        </a>
+                        <a class="btn"
+                           href="/worker/{esc(worker_id)}">
+                            View Profile
+                        </a>
 
-    </div>
-    """, 500
-                
+                        <a class="btn secondary"
+                           href="/workers">
+                            Worker Directory
+                        </a>
+
+                    </div>
+
+                </div>
+                """
+            )
+
+        except Exception as e:
+
+            print("Registration error:", e)
+
+            return """
+            <div style="
+                font-family:Arial;
+                max-width:600px;
+                margin:60px auto;
+                padding:30px;
+                text-align:center;
+            ">
+
+                <h2>Registration could not be completed.</h2>
+
+                <p style="color:#667085;">
+                    Please try again.
+                </p>
+
+                <a href="/register"
+                   style="
+                   display:inline-block;
+                   margin-top:20px;
+                   background:#1769e0;
+                   color:white;
+                   padding:12px 20px;
+                   border-radius:8px;
+                   text-decoration:none;
+                   font-weight:bold;
+                   ">
+                    ← Back to Registration
+                </a>
+
+            </div>
+            """, 500
 
             # -------------------------
             # CREATE WORKER
