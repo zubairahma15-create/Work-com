@@ -1578,7 +1578,9 @@ def register():
             # This prevents the form from being submitted again
             # when the page is refreshed.
 
-            return redirect(url_for("registration_success"))
+       session["pending_worker_id"] = worker_id
+
+return redirect(url_for("registration_payment"))
 
         except Exception as e:
 
