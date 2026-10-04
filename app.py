@@ -1530,7 +1530,7 @@ return page(
         """
         )
 
-    except Exception as e:
+except Exception as e:
 
     print("Registration error:", e)
 
