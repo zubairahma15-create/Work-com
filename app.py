@@ -1433,34 +1433,7 @@ footer strong {
 </html>
 """
 
-                        # -------------------------
-            # UPLOAD WORK PHOTOS
-            # -------------------------
-
-            allowed_types = {
-                "image/jpeg": ".jpg",
-                "image/png": ".png",
-                "image/webp": ".webp"
-            }
-
-            for photo in photos:
-
-                if not photo or not photo.filename:
-                    continue
-
-                content_type = photo.content_type or ""
-
-                if content_type not in allowed_types:
-                    continue
-
-                extension = allowed_types[content_type]
-
-                filename = (
-                    str(worker_id)
-                    + "/"
-                    + str(uuid.uuid4())
-                    + extension
-)
+                    
 
                 photo_data = photo.read()
 
