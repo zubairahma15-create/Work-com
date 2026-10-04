@@ -3330,6 +3330,334 @@ def payment_success():
             Payment verification failed.
         </h2>
         """, 400
+        # =========================================================
+# WORKER REGISTRATION PAYMENT
+# =========================================================
+
+@app.route("/registration-payment")
+def registration_payment():
+
+    worker_id = session.get("pending_worker_id")
+
+    if not worker_id:
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            No pending worker registration found.
+        </h2>
+        """, 400
+
+
+    try:
+
+        amount = 9900  # ₹99
+
+        order = razorpay_client.order.create({
+
+            "amount": amount,
+
+            "currency": "INR",
+
+            "receipt": "workcom_" + str(worker_id),
+
+            "payment_capture": 1
+
+        })
+
+
+        return f"""
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Work.com - Registration Payment</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+
+body {{
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    text-align: center;
+    padding: 40px 20px;
+}}
+
+.payment-box {{
+    background: white;
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}}
+
+h1 {{
+    color: #1769e0;
+}}
+
+.amount {{
+    font-size: 32px;
+    font-weight: 800;
+    margin: 20px;
+}}
+
+button {{
+    width: 100%;
+    border: none;
+    background: #1769e0;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 700;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="payment-box">
+
+    <h1>Work.com</h1>
+
+    <h2>Worker Registration</h2>
+
+    <div class="amount">₹99</div>
+
+    <p>
+        Registration fee
+    </p>
+
+    <br>
+
+    <button onclick="startPayment()">
+        Pay ₹99
+    </button>
+
+</div>
+
+
+<script>
+
+function startPayment() {{
+
+    var options = {{
+
+        "key": "{RAZORPAY_KEY_ID}",
+
+        "amount": "9900",
+
+        "currency": "INR",
+
+        "name": "Work.com",
+
+        "description": "Worker Registration Fee",
+
+        "order_id": "{order['id']}",
+
+        "handler": function(response) {{
+
+            window.location.href =
+                "/registration-payment-success"
+                + "?payment_id="
+                + encodeURIComponent(
+                    response.razorpay_payment_id
+                )
+                + "&order_id="
+                + encodeURIComponent(
+                    response.razorpay_order_id
+                )
+                + "&signature="
+                + encodeURIComponent(
+                    response.razorpay_signature
+                );
+
+        }},
+
+        "theme": {{
+
+            "color": "#1769e0"
+
+        }}
+
+    }};
+
+
+    var rzp = new Razorpay(options);
+
+    rzp.open();
+
+}}
+
+</script>
+
+</body>
+
+</html>
+"""
+
+
+    except Exception as e:
+
+        print("Registration payment error:", e)
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Unable to create payment order.
+        </h2>
+        """, 500
+
+
+
+@app.route("/registration-payment-success")
+def registration_payment_success():
+
+    worker_id = session.get("pending_worker_id")
+
+    payment_id = request.args.get("payment_id")
+
+    order_id = request.args.get("order_id")
+
+    signature = request.args.get("signature")
+
+
+    if not worker_id:
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Worker registration session not found.
+        </h2>
+        """, 400
+
+
+    if not payment_id or not order_id or not signature:
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Payment information is incomplete.
+        </h2>
+        """, 400
+
+
+    try:
+
+        razorpay_client.utility.verify_payment_signature({
+
+            "razorpay_order_id": order_id,
+
+            "razorpay_payment_id": payment_id,
+
+            "razorpay_signature": signature
+
+        })
+
+
+        # Mark worker as paid
+        supabase.table("workers").update({
+
+            "payment_status": "paid"
+
+        }).eq(
+            "id",
+            worker_id
+        ).execute()
+
+
+        # Clear pending worker
+        session.pop("pending_worker_id", None)
+
+
+        return """
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Work.com - Registration Complete</title>
+
+</head>
+
+<body style="
+    font-family:Arial;
+    text-align:center;
+    padding:50px 20px;
+    background:#f5f7fb;
+">
+
+<div style="
+    background:white;
+    max-width:500px;
+    margin:auto;
+    padding:35px;
+    border-radius:18px;
+">
+
+    <div style="font-size:55px;">
+        ✅
+    </div>
+
+    <h1>Registration Complete!</h1>
+
+    <p>
+        Your ₹99 payment was verified successfully.
+    </p>
+
+    <p>
+        Your Work.com worker profile is now active.
+    </p>
+
+    <br>
+
+    <a
+        href="/workers"
+        style="
+            display:inline-block;
+            background:#1769e0;
+            color:white;
+            padding:13px 22px;
+            border-radius:9px;
+            text-decoration:none;
+            font-weight:700;
+        "
+    >
+        View Workers
+    </a>
+
+</div>
+
+</body>
+
+</html>
+"""
+
+
+    except Exception as e:
+
+        print("Registration payment verification error:", e)
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Payment verification failed.
+        </h2>
+        """, 400
 # =========================================================
 # START APP
 # =========================================================
