@@ -3070,7 +3070,266 @@ footer {{
 """
 
 
+# =========================================================
+# RAZORPAY TEST PAYMENT
+# =========================================================
 
+@app.route("/payment-test")
+def payment_test():
+
+    try:
+
+        amount = 9900  # ₹99 in paise
+
+        order = razorpay_client.order.create({
+            "amount": amount,
+            "currency": "INR",
+            "receipt": "workcom_test_99",
+            "payment_capture": 1
+        })
+
+        return f"""
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Work.com - Test Payment</title>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<style>
+
+body {{
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    text-align: center;
+    padding: 40px 20px;
+}}
+
+.payment-box {{
+    background: white;
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 5px 25px rgba(0,0,0,.08);
+}}
+
+h1 {{
+    color: #1769e0;
+}}
+
+.amount {{
+    font-size: 32px;
+    font-weight: 800;
+    margin: 20px;
+}}
+
+button {{
+    width: 100%;
+    border: none;
+    background: #1769e0;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 700;
+}}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="payment-box">
+
+    <h1>Work.com</h1>
+
+    <h2>Registration Fee</h2>
+
+    <div class="amount">₹99</div>
+
+    <p>
+        This is a TEST payment.
+    </p>
+
+    <br>
+
+    <button onclick="startPayment()">
+        Pay ₹99
+    </button>
+
+</div>
+
+
+<script>
+
+function startPayment() {{
+
+    var options = {{
+
+        "key": "{RAZORPAY_KEY_ID}",
+
+        "amount": "9900",
+
+        "currency": "INR",
+
+        "name": "Work.com",
+
+        "description": "Worker Registration Fee",
+
+        "order_id": "{order['id']}",
+
+        "handler": function (response) {{
+
+            window.location.href =
+                "/payment-success"
+                + "?payment_id="
+                + encodeURIComponent(response.razorpay_payment_id)
+                + "&order_id="
+                + encodeURIComponent(response.razorpay_order_id)
+                + "&signature="
+                + encodeURIComponent(response.razorpay_signature);
+
+        }},
+
+        "theme": {{
+
+            "color": "#1769e0"
+
+        }}
+
+    }};
+
+
+    var rzp = new Razorpay(options);
+
+    rzp.open();
+
+}}
+
+</script>
+
+</body>
+
+</html>
+"""
+
+    except Exception as e:
+
+        print("Payment order error:", e)
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Unable to create payment order.
+        </h2>
+        """, 500
+
+
+@app.route("/payment-success")
+def payment_success():
+
+    payment_id = request.args.get("payment_id")
+    order_id = request.args.get("order_id")
+    signature = request.args.get("signature")
+
+    if not payment_id or not order_id or not signature:
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Payment information is incomplete.
+        </h2>
+        """, 400
+
+
+    try:
+
+        razorpay_client.utility.verify_payment_signature({
+
+            "razorpay_order_id": order_id,
+
+            "razorpay_payment_id": payment_id,
+
+            "razorpay_signature": signature
+
+        })
+
+        return """
+        <!DOCTYPE html>
+
+        <html>
+
+        <head>
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
+        <title>Payment Successful</title>
+
+        </head>
+
+        <body style="
+            font-family:Arial;
+            text-align:center;
+            padding:50px 20px;
+            background:#f5f7fb;
+        ">
+
+        <div style="
+            background:white;
+            max-width:500px;
+            margin:auto;
+            padding:35px;
+            border-radius:18px;
+        ">
+
+            <div style="font-size:55px;">
+                ✅
+            </div>
+
+            <h1>Payment Successful</h1>
+
+            <p>
+                Your ₹99 Work.com test payment was verified successfully.
+            </p>
+
+            <br>
+
+            <a href="/" style="
+                display:inline-block;
+                background:#1769e0;
+                color:white;
+                padding:13px 22px;
+                border-radius:9px;
+                text-decoration:none;
+                font-weight:700;
+            ">
+                Back to Work.com
+            </a>
+
+        </div>
+
+        </body>
+
+        </html>
+        """
+
+    except Exception as e:
+
+        print("Payment verification error:", e)
+
+        return """
+        <h2 style="font-family:Arial;text-align:center;margin-top:50px;">
+            Payment verification failed.
+        </h2>
+        """, 400
 # =========================================================
 # START APP
 # =========================================================
