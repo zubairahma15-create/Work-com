@@ -1436,7 +1436,7 @@ footer strong {
             # UPLOAD WORK PHOTOS
             # -------------------------
 
-            import uuid
+        import uuid
 
             allowed_types = {
                 "image/jpeg": ".jpg",
