@@ -1527,10 +1527,10 @@ return page(
         </div>
 
     </div>
-    """
-)
+        """
+        )
 
-except Exception as e:
+    except Exception as e:
 
     print("Registration error:", e)
 
