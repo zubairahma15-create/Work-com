@@ -3,6 +3,7 @@ from supabase import create_client
 from html import escape
 import razorpay
 import os
+import uuid
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32)
@@ -1432,11 +1433,9 @@ footer strong {
 </html>
 """
 
-            # -------------------------
+                        # -------------------------
             # UPLOAD WORK PHOTOS
             # -------------------------
-
-            import uuid
 
             allowed_types = {
                 "image/jpeg": ".jpg",
@@ -1461,7 +1460,7 @@ footer strong {
                     + "/"
                     + str(uuid.uuid4())
                     + extension
-                )
+)
 
                 photo_data = photo.read()
 
