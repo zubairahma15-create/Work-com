@@ -4338,6 +4338,37 @@ View Workers
         </h2>
         """, 400
 
+# =========================================================
+# WORK.COM SITEMAP AND ROBOTS.TXT
+# =========================================================
+
+@app.route("/sitemap.xml")
+def workcom_sitemap():
+    sitemap_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://work-com-vaz8.onrender.com/</loc>
+    </url>
+</urlset>
+"""
+    return app.response_class(
+        sitemap_xml,
+        mimetype="application/xml"
+    )
+
+
+@app.route("/robots.txt")
+def workcom_robots():
+    robots_text = """User-agent: *
+Allow: /
+
+Sitemap: https://work-com-vaz8.onrender.com/sitemap.xml
+"""
+    return app.response_class(
+        robots_text,
+        mimetype="text/plain"
+    )
+
 
 # =========================================================
 # START APP
