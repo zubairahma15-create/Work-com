@@ -4373,7 +4373,18 @@ Sitemap: https://work-com-vaz8.onrender.com/sitemap.xml
 # =========================================================
 # START APP
 # =========================================================
+@app.route("/service-worker.js")
+def service_worker():
+return app.send_static_file("sw.js"), 200, {
+"Content-Type": "application/javascript",
+"Service-Worker-Allowed": "/"
+}
 
+@app.route("/manifest.json")
+def app_manifest():
+return app.send_static_file("manifest.json"), 200, {
+"Content-Type": "application/manifest+json"
+}
 if __name__ == "__main__":
 
     app.run(
