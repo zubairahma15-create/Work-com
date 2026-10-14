@@ -1021,8 +1021,10 @@ def home():
 <html lang="en">
 
 <head>
+          
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1565c0">
+
 <meta
     name="google-site-verification"
     content="U5lX7y6Xwd0Ggm8ZcVTa34J3s-NFNDRAj_jgfTWZTAQ"
@@ -1763,7 +1765,17 @@ Work.com
 with skilled workers
 
 </footer>
-
+</footer><script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/service-worker.js")
+            .catch(function (error) {
+                console.error("Service worker registration failed:", error);
+            });
+    });
+}
+</script></body></html>
+"""
 </body>
 
 </html>
