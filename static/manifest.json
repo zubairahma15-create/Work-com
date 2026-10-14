@@ -1,1 +1,13 @@
-
+{
+"id": "/",
+"name": "Work.com - Find Skilled Workers",
+"short_name": "Work.com",
+"description": "Find and connect with skilled workers near you.",
+"start_url": "/",
+"scope": "/",
+"display": "standalone",
+"orientation": "portrait",
+"background_color": "#ffffff",
+"theme_color": "#1565c0",
+"icons": []
+}
