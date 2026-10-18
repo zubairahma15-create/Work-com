@@ -1765,7 +1765,8 @@ Work.com
 with skilled workers
 
 </footer>
-</footer><script>
+
+<script>
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
         navigator.serviceWorker.register("/service-worker.js")
@@ -1774,10 +1775,9 @@ if ("serviceWorker" in navigator) {
             });
     });
 }
-</script></body></html>
-"""
-</body>
+</script>
 
+</body>
 </html>
 """
 
