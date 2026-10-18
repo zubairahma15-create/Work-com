@@ -4383,9 +4383,12 @@ Sitemap: https://work-com-vaz8.onrender.com/sitemap.xml
     )
 
 
-# =========================================================
-# START APP
-# =========================================================
+=========================================================
+
+START APP
+
+=========================================================
+
 @app.route("/service-worker.js")
 def service_worker():
 return app.send_static_file("sw.js"), 200, {
@@ -4404,3 +4407,5 @@ app.run(
 host="0.0.0.0",
 port=int(os.environ.get("PORT", 5000))
 )
+
+
