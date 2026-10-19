@@ -1765,7 +1765,8 @@ Work.com
 with skilled workers
 
 </footer>
-</footer><script>
+
+<script>
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
         navigator.serviceWorker.register("/service-worker.js")
@@ -1774,10 +1775,9 @@ if ("serviceWorker" in navigator) {
             });
     });
 }
-</script></body></html>
-"""
-</body>
+</script>
 
+</body>
 </html>
 """
 
@@ -4383,9 +4383,12 @@ Sitemap: https://work-com-vaz8.onrender.com/sitemap.xml
     )
 
 
-# =========================================================
-# START APP
-# =========================================================
+=========================================================
+
+START APP
+
+=========================================================
+
 @app.route("/service-worker.js")
 def service_worker():
 return app.send_static_file("sw.js"), 200, {
@@ -4398,14 +4401,11 @@ def app_manifest():
 return app.send_static_file("manifest.json"), 200, {
 "Content-Type": "application/manifest+json"
 }
-if __name__ == "__main__":
 
-    app.run(
-        host="0.0.0.0",
-        port=int(
-            os.environ.get(
-                "PORT",
-                5000
-            )
-        )
-    )
+if __name__ == "__main__":
+app.run(
+host="0.0.0.0",
+port=int(os.environ.get("PORT", 5000))
+)
+
+
